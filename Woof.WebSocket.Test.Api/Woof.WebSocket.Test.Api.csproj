@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="protobuf-net" Version="3.0.29" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Woof.WebSocket.csproj" />
+  </ItemGroup>
+
+</Project>
