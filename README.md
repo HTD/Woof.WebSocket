@@ -12,10 +12,22 @@ Designed to make WebSocket APIs blazing fast.
 
 ## Q/A:
 
+> Q: Dependencies?<br/>
+> A: .NET Standard 2.0, protobuf-net.
+
+> Q: Thread-safe?<br/>
+> A: Yes. Tested.
+
+> Q: Asynchronous?<br/>
+> A: Task based. Fully asynchronous.
+
+> Q: How call `SendMessageAsync()` and friends in an event handler?<br/>
+> A: Make the event handler "async void" and ensure no exceptions are thrown there.
+
 > Q: Will the server work with clients in other environments (non .NET)?<br/>
 > A: Yes. WOOF codec uses compatible Google Protocol Buffer serializer available for many environments.
 
-> Q: Where can I find an example of a client written in language x?
+> Q: Where can I find an example of a client written in language x?<br/>
 > A: Be the first to write it and don't forget to send a pull request.
 
 > Q: Can custom subprotocols be used with WebSocket transport?<br/>
