@@ -15,7 +15,7 @@ namespace Woof.WebSocket {
         /// <param name="source">Buffer.</param>
         /// <returns>Message.</returns>
         public TMessage Deserialize<TMessage>(ArraySegment<byte> source)
-            => ProtoBuf.Serializer.Deserialize<TMessage>((ReadOnlySpan<byte>)source);
+            => ProtoBuf.Serializer.Deserialize<TMessage>((ReadOnlyMemory<byte>)source);
 
         /// <summary>
         /// Deserializes the message from the buffer.
@@ -24,7 +24,7 @@ namespace Woof.WebSocket {
         /// <param name="source">Buffer.</param>
         /// <returns>Message.</returns>
         public object Deserialize(Type type, ArraySegment<byte> source)
-            => ProtoBuf.Serializer.NonGeneric.Deserialize(type, (ReadOnlySpan<byte>)source);
+            => ProtoBuf.Serializer.NonGeneric.Deserialize(type, (ReadOnlyMemory<byte>)source);
 
         /// <summary>
         /// Serializes the message to the buffer.
