@@ -52,8 +52,13 @@ namespace Woof.WebSocket {
             var clientWebSocket = new ClientWebSocket();
             Context = new WebSocketContext(clientWebSocket);
             clientWebSocket.Options.AddSubProtocol(Codec.SubProtocol);
-            await clientWebSocket.ConnectAsync(EndPointUri, CTS.Token);
-            await StartReceiveAsync(Context, CTS.Token, OnCloseReceivedAsync);
+            try {
+                await clientWebSocket.ConnectAsync(EndPointUri, CTS.Token);
+                await StartReceiveAsync(Context, CTS.Token, OnCloseReceivedAsync);
+            } catch {
+                await StopAsync();
+                throw;
+            }
         }
 
         /// <summary>
@@ -62,7 +67,6 @@ namespace Woof.WebSocket {
         /// <returns>Task completed when all client tasks are stopped and the connection is closed.</returns>
         public async Task StopAsync() {
             if (State == ServiceState.Stopping || State == ServiceState.Stopped) return;
-            if (State == ServiceState.Starting) throw new InvalidOperationException("Cannot shutdown during startup");
             State = ServiceState.Stopping;
             OnStateChanged(State);
             try {

@@ -30,7 +30,13 @@ namespace Woof.WebSocket.Test.Client {
         /// <param name="client">WS API client.</param>
         public Tests(TestClient client) {
             Client = client;
-            if (client.State != ServiceState.Started) Client.StartAsync().Wait();
+            try {
+                if (client.State != ServiceState.Started) Client.StartAsync().Wait();
+            }
+            catch (Exception exception) {
+                while (exception.InnerException != null) exception = exception.InnerException;
+                Console.WriteLine(exception.Message);
+            }
         }
 
         /// <summary>
@@ -39,6 +45,7 @@ namespace Woof.WebSocket.Test.Client {
         /// <param name="args">Command line arguments.</param>
         /// <returns>Task completed when matched tests completed.</returns>
         public async Task MatchTestsFromArguments(string[] args) {
+            if (Client.State != ServiceState.Started) return;
             if (IsArgMatched(args, "auth")) await AuthorizationTestAsync();
             if (IsArgMatched(args, "ping")) await PingTestAsync();
             if (IsArgMatched(args, "ping-pong", out int iterations, 1024)) await PingPongTestAsync(iterations);
