@@ -13,6 +13,11 @@ namespace Woof.WebSocket {
     public abstract class SubProtocolCodec<TTypeIndex, TMessageId> {
 
         /// <summary>
+        /// Gets the buffer serializer implementation.
+        /// </summary>
+        protected abstract IBufferSerializer Serializer { get; }
+
+        /// <summary>
         /// Gets or sets the state used to access <see cref="SessionProvider"/> and <see cref="IAuthenticationProvider"/>.
         /// </summary>
         internal IStateProvider State { get; set; }

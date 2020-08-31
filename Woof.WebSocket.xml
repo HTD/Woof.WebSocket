@@ -207,6 +207,35 @@
             <param name="apiKey">API key.</param>
             <returns>Message signing key or null if not authenticated.</returns>
         </member>
+        <member name="T:Woof.WebSocket.IBufferSerializer">
+            <summary>
+            An interface to isolate the concrete serializers from their implementations.
+            </summary>
+        </member>
+        <member name="M:Woof.WebSocket.IBufferSerializer.Serialize``1(``0)">
+            <summary>
+            Serializes a message to a buffer.
+            </summary>
+            <typeparam name="TMessage">Message type.</typeparam>
+            <param name="message">Message.</param>
+            <returns>Buffer.</returns>
+        </member>
+        <member name="M:Woof.WebSocket.IBufferSerializer.Deserialize``1(System.ArraySegment{System.Byte})">
+            <summary>
+            Deserializes a message from a buffer.
+            </summary>
+            <typeparam name="TMessage">Message type.</typeparam>
+            <param name="source">Buffer.</param>
+            <returns>Message.</returns>
+        </member>
+        <member name="M:Woof.WebSocket.IBufferSerializer.Deserialize(System.Type,System.ArraySegment{System.Byte})">
+            <summary>
+            Deserializes a message from a buffer.
+            </summary>
+            <param name="type">Message type.</param>
+            <param name="source">Buffer.</param>
+            <returns>Message.</returns>
+        </member>
         <member name="T:Woof.WebSocket.ISession">
             <summary>
             A session having a message signing key.
@@ -314,6 +343,35 @@
             <summary>
             Message type dictionary used to resolve message type from type identifier read from message header.
             </summary>
+        </member>
+        <member name="T:Woof.WebSocket.ProtoBufSerializer">
+            <summary>
+            Protocol Buffers serializer implementation.
+            </summary>
+        </member>
+        <member name="M:Woof.WebSocket.ProtoBufSerializer.Deserialize``1(System.ArraySegment{System.Byte})">
+            <summary>
+            Serializes the message from the buffer.
+            </summary>
+            <typeparam name="TMessage">Message type.</typeparam>
+            <param name="source">Buffer.</param>
+            <returns>Message.</returns>
+        </member>
+        <member name="M:Woof.WebSocket.ProtoBufSerializer.Deserialize(System.Type,System.ArraySegment{System.Byte})">
+            <summary>
+            Deserializes the message from the buffer.
+            </summary>
+            <param name="type">Message type.</param>
+            <param name="source">Buffer.</param>
+            <returns>Message.</returns>
+        </member>
+        <member name="M:Woof.WebSocket.ProtoBufSerializer.Serialize``1(``0)">
+            <summary>
+            Serializes the message to the buffer.
+            </summary>
+            <typeparam name="TMessage">Message type.</typeparam>
+            <param name="message">Message.</param>
+            <returns>Buffer.</returns>
         </member>
         <member name="T:Woof.WebSocket.RequestIncompleteCollection">
             <summary>
@@ -614,6 +672,11 @@
             </summary>
             <typeparam name="TTypeIndex">Message type index type.</typeparam>
             <typeparam name="TMessageId">Message identifier type.</typeparam>
+        </member>
+        <member name="P:Woof.WebSocket.SubProtocolCodec`2.Serializer">
+            <summary>
+            Gets the buffer serializer implementation.
+            </summary>
         </member>
         <member name="P:Woof.WebSocket.SubProtocolCodec`2.State">
             <summary>
@@ -1044,6 +1107,11 @@
         <member name="F:Woof.WebSocket.WoofSubProtocol.WoofCodec.Name">
             <summary>
             Common subprotocol name.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.WoofSubProtocol.WoofCodec.Serializer">
+            <summary>
+            Gets the Protocol Buffers serializer.
             </summary>
         </member>
         <member name="P:Woof.WebSocket.WoofSubProtocol.WoofCodec.SubProtocol">

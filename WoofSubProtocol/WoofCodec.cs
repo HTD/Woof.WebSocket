@@ -19,7 +19,7 @@ namespace Woof.WebSocket.WoofSubProtocol {
     /// <summary>
     /// Implements WOOF subprotocol codec.
     /// </summary>
-    public class WoofCodec : CodecBase {
+    public sealed class WoofCodec : CodecBase {
 
         #region Public API
 
@@ -27,6 +27,11 @@ namespace Woof.WebSocket.WoofSubProtocol {
         /// Common subprotocol name.
         /// </summary>
         public const string Name = "WOOF";
+
+        /// <summary>
+        /// Gets the Protocol Buffers serializer.
+        /// </summary>
+        protected override IBufferSerializer Serializer { get; } = new ProtoBufSerializer();
 
         /// <summary>
         /// Gets the subprotocol name.
@@ -60,7 +65,7 @@ namespace Woof.WebSocket.WoofSubProtocol {
         /// <param name="limit">Optional message length limit, applied if positive value provided.</param>
         /// <returns>Task returning decoded message with the identifier.</returns>
         public override async Task<DecodeResult> DecodeMessageAsync(WebSocketContext context, CancellationToken token, int limit = default) {
-            var metaLengthBuffer = GetBuffer(1);
+            var metaLengthBuffer = new ArraySegment<byte>(new byte[1]);
             var receiveResult = await context.ReceiveAsync(metaLengthBuffer, token);
             if (receiveResult.MessageType == WebSocketMessageType.Close)
                 return new DecodeResult(receiveResult);
@@ -69,7 +74,7 @@ namespace Woof.WebSocket.WoofSubProtocol {
             if (receiveResult.EndOfMessage || receiveResult.Count < 1)
                 return new DecodeResult(new InvalidOperationException(EHeaderIncomplete));
             var metaLength = metaLengthBuffer.Array[0];
-            var metaDataBuffer = GetBuffer(metaLength);
+            var metaDataBuffer = new ArraySegment<byte>(new byte[metaLength]);
             receiveResult = await context.ReceiveAsync(metaDataBuffer, token);
             if (receiveResult.MessageType == WebSocketMessageType.Close)
                 return new DecodeResult(receiveResult);
@@ -77,7 +82,7 @@ namespace Woof.WebSocket.WoofSubProtocol {
                 return new DecodeResult(new InvalidOperationException(EInvalidType));
             if (receiveResult.Count < metaLength)
                 return new DecodeResult(new InvalidOperationException(EHeaderIncomplete));
-            var metaData = Deserialize<MessageMetadata>(metaDataBuffer);
+            var metaData = Serializer.Deserialize<MessageMetadata>(metaDataBuffer);
             if (!MessageTypes.ContainsKey(metaData.TypeId))
                 return new DecodeResult(metaData.TypeId, metaData.Id, new InvalidOperationException(EUnknownType));
             if (limit >= 0 && metaData.PayloadLength > limit)
@@ -85,11 +90,11 @@ namespace Woof.WebSocket.WoofSubProtocol {
             var typeContext = MessageTypes[metaData.TypeId];
             if (receiveResult.EndOfMessage)
                 return new DecodeResult(metaData.TypeId, metaData.Id, Activator.CreateInstance(typeContext.MessageType));
-            var messageBuffer = GetBuffer(metaData.PayloadLength);
+            var messageBuffer = new ArraySegment<byte>(new byte[metaData.PayloadLength]);
             receiveResult = await context.ReceiveAsync(messageBuffer, token);
             if (receiveResult.Count < metaData.PayloadLength || !receiveResult.EndOfMessage)
                 return new DecodeResult(metaData.TypeId, metaData.Id, new InvalidOperationException(EMessageIncomplete));
-            var message = Deserialize(MessageTypes[metaData.TypeId].MessageType, messageBuffer);
+            var message = Serializer.Deserialize(MessageTypes[metaData.TypeId].MessageType, messageBuffer);
             var isSignatureValid = false;
             var isSignInRequest = typeContext.IsSignInRequest || message is ISignInRequest;
             if (typeContext.IsSigned && metaData.Signature != null) {
@@ -118,7 +123,7 @@ namespace Woof.WebSocket.WoofSubProtocol {
             if (!context.IsOpen) return;
             var typeId = MessageTypes.GetTypeId<TMessage>();
             var typeContext = MessageTypes[typeId];
-            var messageBuffer = Serialize(message);
+            var messageBuffer = Serializer.Serialize(message);
             var isPayloadPresent = messageBuffer.Count > 0;
             var key = typeContext.IsSigned ? State.SessionProvider.GetKey(context) : null;
             var metadata =
@@ -134,8 +139,8 @@ namespace Woof.WebSocket.WoofSubProtocol {
                     PayloadLength = messageBuffer.Count,
                     Signature = Sign(messageBuffer, key)
                 };
-            var metaDataBuffer = Serialize(metadata);
-            var metaSizeBuffer = GetBuffer(1);
+            var metaDataBuffer = Serializer.Serialize(metadata);
+            var metaSizeBuffer = new ArraySegment<byte>(new byte[1]);
             metaSizeBuffer.Array[0] = (byte)metaDataBuffer.Count;
             var messageParts =
                 isPayloadPresent 
@@ -190,28 +195,22 @@ namespace Woof.WebSocket.WoofSubProtocol {
 
         #endregion
 
-        #region Helpers
+        //#region Helpers
 
-        private ArraySegment<byte> GetBuffer(int size) => new ArraySegment<byte>(new byte[size]);
+        //private ArraySegment<byte> GetBuffer(int size) => new ArraySegment<byte>(new byte[size]);
 
-        private ArraySegment<byte> Serialize<TMessage>(TMessage message, int limit = default) {
-            using var stream = limit >= 0 ? new MemoryStream(limit) : new MemoryStream();
-            Serializer.Serialize(stream, message);
-            if (stream.TryGetBuffer(out var buffer)) return buffer;
-            else throw new InvalidOperationException();
-        }
+        //private ArraySegment<byte> Serialize<TMessage>(TMessage message, int limit = default) {
+        //    using var stream = limit >= 0 ? new MemoryStream(limit) : new MemoryStream();
+        //    Serializer.Serialize(stream, message);
+        //    if (stream.TryGetBuffer(out var buffer)) return buffer;
+        //    else throw new InvalidOperationException();
+        //}
 
-        private object Deserialize(Type type, ArraySegment<byte> buffer) {
-            using var stream = new MemoryStream(buffer.Array, buffer.Offset, buffer.Count);
-            return Serializer.Deserialize(type, stream);
-        }
+        //private object Deserialize(Type type, ArraySegment<byte> buffer) => ProtoBuf.Serializer.NonGeneric.Deserialize(type, (ReadOnlySpan<byte>)buffer);
 
-        private T Deserialize<T>(ArraySegment<byte> buffer) {
-            using var stream = new MemoryStream(buffer.Array, buffer.Offset, buffer.Count);
-            return Serializer.Deserialize<T>(stream);
-        }
+        //private T Deserialize<T>(ArraySegment<byte> buffer) => Serializer.Deserialize<T>((ReadOnlySpan<byte>)buffer);
 
-        #endregion
+        //#endregion
 
         #region Exception messages
 
