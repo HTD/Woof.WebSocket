@@ -4,6 +4,7 @@ namespace Woof.WebSocket {
 
     /// <summary>
     /// An interface to isolate the concrete serializers from their implementations.
+    /// <see cref="ArraySegment{T}"/> is used as a buffer.
     /// </summary>
     public interface IBufferSerializer {
 
