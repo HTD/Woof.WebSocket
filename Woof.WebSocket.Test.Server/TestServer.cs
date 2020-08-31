@@ -5,59 +5,64 @@ using Woof.WebSocket.Test.Api;
 
 namespace Woof.WebSocket.Test.Server {
 
+    /// <summary>
+    /// Test server designed as a part of package documentation.
+    /// </summary>
     class TestServer : Woof.WebSocket.Server {
 
+        /// <summary>
+        /// Initializes the test server instance.
+        /// </summary>
         public TestServer() {
-            EndPointUri = Api.Properties.EndPointUri;
-            Codec.LoadMessageTypes();
             AuthenticationProvider = new TestAuthenticationProvider();
-            MessageReceived += TestServer_MessageReceived;
+            EndPointUri = Api.Properties.EndPointUri;
+            Codec.LoadMessageTypes(); // IMPORTANT: IT MUSN'T BE CALLED UNLESS AT LEAST ONE API ASSEMBLY MEMBER WAS NOT TOUCHED!
         }
 
-        private async void TestServer_MessageReceived(object sender, MessageReceivedEventArgs<int, Guid> e) {
-            if (e.DecodeResult.IsUnauthorized) {
-                await SendMessageAsync(new AccessDeniedResponse(), e.Context, e.DecodeResult.Id);
+        /// <summary>
+        /// Handles MessageReceived events.<br/>
+        /// Note that since the function is "async void" it should not throw because such exceptions can't be caught.
+        /// </summary>
+        /// <param name="decodeResult">Message receive result.</param>
+        /// <param name="context">WebSocket (client) context.</param>
+        protected override async void OnMessageReceived(DecodeResult<int, Guid> decodeResult, WebSocketContext context) {
+            if (decodeResult.IsUnauthorized) {
+                await SendMessageAsync(new AccessDeniedResponse(), context, decodeResult.MessageId);
                 return;
             }
-            switch (e.Message) {
-                case HelloRequest helloRequest:
-                    await SendMessageAsync(new HelloResponse { MessageText = $"Hello, {helloRequest.Name}!" }, e.Context, e.DecodeResult.Id);
-                    break;
-                case SubscribeRequest subscribeRequest:
-                    switch (subscribeRequest.Name) {
-                        case "time":
-                            await AsyncLoop.FromIterationAsync(async () => {
-                                await SendMessageAsync(new TimeNotification { Time = DateTime.Now }, e.Context);
-                                await Task.Delay(subscribeRequest.Period);
-                            }, CancellationToken, OnReceiveException, () => e.Context.IsOpen);
-                            break;
-                    }
-                    break;
+            switch (decodeResult.Message) {
                 case SignInRequest signInRequest:
-                    var session = SessionProvider.GetSession<ApiClientSession>(e.Context);
+                    var session = SessionProvider.GetSession<ApiClientSession>(context);
                     session.Key = await AuthenticationProvider.GetKeyAsync(signInRequest.ApiKey);
-                    await SendMessageAsync(new SignInResponse { IsSuccess = e.DecodeResult.IsSignatureValid && session.Key != null }, e.Context, e.DecodeResult.Id);
+                    await SendMessageAsync(new SignInResponse { IsSuccess = decodeResult.IsSignatureValid && session.Key != null }, context, decodeResult.MessageId);
                     break;
                 case SignOutRequest signOutRequest:
-                    SessionProvider.CloseSession(e.Context);
-                    await SendMessageAsync(new SignOutResponse { ServerTime = DateTime.Now }, e.Context, e.DecodeResult.Id);
+                    SessionProvider.CloseSession(context);
+                    await SendMessageAsync(new SignOutResponse { ServerTime = DateTime.Now }, context, decodeResult.MessageId);
                     break;
-                case AuthenticatedRequest authenticatedRequest:
-                    await SendMessageAsync(new AuthenticatedResponse {
-                        Answer = e.DecodeResult.IsSignatureValid
-                        ? $"{authenticatedRequest.Question} 42?"
-                        : "GET LOST!"
-                    }, e.Context, e.DecodeResult.Id);
+                case PingRequest pingRequest:
+                    await SendMessageAsync(new PingResponse(), context, decodeResult.MessageId);
                     break;
-                case EmptyRequest emptyRequest:
-                    await SendMessageAsync(new EmptyResponse(), e.Context, e.DecodeResult.Id);
+                case DivideRequest divideRequest:
+                    try {
+                        var result = divideRequest.X / divideRequest.Y;
+                        await SendMessageAsync(new DivideResponse { Result = result }, context, decodeResult.MessageId);
+                    }
+                    catch (Exception divideException) {
+                        await SendMessageAsync(new ErrorResponse { Code = 400, Description = divideException.Message }, context, decodeResult.MessageId);
+                    }
+                    break;
+                case PrivateRequest privateRequest:
+                    await SendMessageAsync(new PrivateResponse { Secret = "AUTHORIZED" }, context, decodeResult.MessageId);
+                    break;
+                case TimeSubscribeRequest subscribeRequest:
+                    await AsyncLoop.FromIterationAsync(async () => {
+                        await SendMessageAsync(new TimeNotification { Time = DateTime.Now }, context);
+                        await Task.Delay(subscribeRequest.Period);
+                    }, CancellationToken, OnReceiveException, () => context.IsOpen);
                     break;
             }
         }
-
-
-        
-        
 
     }
 

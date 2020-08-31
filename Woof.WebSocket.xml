@@ -107,7 +107,7 @@
             Gets the message type identifier.
             </summary>
         </member>
-        <member name="P:Woof.WebSocket.DecodeResult`2.Id">
+        <member name="P:Woof.WebSocket.DecodeResult`2.MessageId">
             <summary>
             Gets the message identifier.
             </summary>

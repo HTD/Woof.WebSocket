@@ -1,15 +1,29 @@
 ﻿using System;
 using System.Data;
+using System.Diagnostics.Contracts;
 
 using ProtoBuf;
 
 using Woof.WebSocket.WoofSubProtocol;
 
+/// <summary>
+/// Test API definition designed as a part of package documentation.
+/// </summary>
 namespace Woof.WebSocket.Test.Api {
 
+    // MESSAGE DEFINITIONS:
+
+    /// <summary>
+    /// Special sign-in request, note that it's signed and inherits <see cref="ISignInRequest"/> interface.<br/>
+    /// Every message capable of being transpored using <see cref="WoofCodec"/> must have <see cref="MessageAttribute"/> and <see cref="ProtoContractAttribute"/> set.
+    /// </summary>
     [Message(1, IsSigned = true), ProtoContract]
     public class SignInRequest : ISignInRequest {
 
+        /// <summary>
+        /// Gets or sets the API key in binary form. Reqiured by <see cref="ISignInRequest"/> interface.<br/>
+        /// Every property of the message transported using <see cref="WoofCodec"/> must have <see cref="ProtoMemberAttribute"/> set.
+        /// </summary>
         [ProtoMember(1)]
         public byte[] ApiKey { get; set; }
 
@@ -54,58 +68,70 @@ namespace Woof.WebSocket.Test.Api {
     }
 
     [Message(7), ProtoContract]
-    public class HelloRequest {
-
-        [ProtoMember(1)]
-        public string Name { get; set; }
-    }
+    public class PingRequest { }
 
     [Message(8), ProtoContract]
-    public class HelloResponse {
-
-        [ProtoMember(1)]
-        public string MessageText { get; set; }
-
-    }
+    public class PingResponse { }
 
     [Message(9), ProtoContract]
-    public class SubscribeRequest {
-
+    public class DivideRequest { 
+    
+        /// <summary>
+        /// Note that the decimal type is just to make it harder for the serializer.
+        /// </summary>
         [ProtoMember(1)]
-        public string Name { get; set; }
+        public decimal X { get; set; }
 
         [ProtoMember(2)]
-        public TimeSpan Period { get; set; }
+        public decimal Y { get; set; }
 
     }
 
     [Message(10), ProtoContract]
+    public class DivideResponse { 
+
+        [ProtoMember(1)]
+        public decimal Result { get; set; }
+
+    }
+
+    /// <summary>
+    /// Note that the message is required to be signed.<br/>
+    /// Check <see cref="DecodeResult{TTypeIndex, TMessageId}.IsSignatureValid"/> in <see cref="MessageReceivedEventArgs"/>.
+    /// </summary>
+    [Message(11, IsSigned = true), ProtoContract]
+    public class PrivateRequest { 
+
+        [ProtoMember(1)]
+        public DateTime ClientTime { get; set; }
+
+    }
+
+    [Message(12), ProtoContract]
+    public class PrivateResponse { 
+    
+        [ProtoMember(1)]
+        public string Secret { get; set; }
+    
+    }
+
+    /// <summary>
+    /// Note that this particular request doesn't have matching response.
+    /// </summary>
+    [Message(13), ProtoContract]
+    public class TimeSubscribeRequest {
+
+        [ProtoMember(1)]
+        public TimeSpan Period { get; set; }
+
+    }
+
+    [Message(14), ProtoContract]
     public class TimeNotification {
 
         [ProtoMember(1)]
         public DateTime Time { get; set; }
 
     }
-    [Message(11, IsSigned = true), ProtoContract]
-    public class AuthenticatedRequest {
-
-        [ProtoMember(1)]
-        public string Question { get; set; }
-
-    }
-
-    [Message(12), ProtoContract]
-    public class AuthenticatedResponse {
-
-        [ProtoMember(1)]
-        public string Answer { get; set; }
-
-    }
-
-    [Message(13), ProtoContract]
-    public class EmptyRequest { }
-
-    [Message(14), ProtoContract]
-    public class EmptyResponse { }
-
+    
 }

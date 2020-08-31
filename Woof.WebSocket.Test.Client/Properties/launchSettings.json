@@ -2,7 +2,7 @@
   "profiles": {
     "Woof.WebSocket.Test.Client": {
       "commandName": "Project",
-      "commandLineArgs": "hello sign-in subscribe time 1"
+      "commandLineArgs": "all ping-pong 1024"
     }
   }
 }

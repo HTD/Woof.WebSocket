@@ -48,6 +48,11 @@ namespace Woof.WebSocket {
         /// </summary>
         public IAuthenticationProvider AuthenticationProvider { get; set; }
 
+        /// <summary>
+        /// Gets the current client or server state.
+        /// </summary>
+        public ServiceState State { get; set; } = ServiceState.Stopped;
+
         #endregion
 
         /// <summary>
@@ -81,11 +86,6 @@ namespace Woof.WebSocket {
         /// A collection of incomplete requests requiring the other party's response.
         /// </summary>
         protected RequestIncompleteCollection<TTypeIndex, TMessageId> RequestsIncomplete { get; }
-
-        /// <summary>
-        /// Gets the current client or server state.
-        /// </summary>
-        protected ServiceState State { get; set; } = ServiceState.Stopped;
 
         #endregion
 
@@ -137,7 +137,7 @@ namespace Woof.WebSocket {
                 try {
                     var decodeResult = await Codec.DecodeMessageAsync(context, CancellationToken, MaxReceiveMessageSize);
                     if (decodeResult.IsCloseFrame) break;
-                    if (RequestsIncomplete.TryRemoveResponseSynchronizer(decodeResult.Id, out var responseSynchronizer)) {
+                    if (RequestsIncomplete.TryRemoveResponseSynchronizer(decodeResult.MessageId, out var responseSynchronizer)) {
                         responseSynchronizer.Message = decodeResult.Message;
                         responseSynchronizer.Semaphore.Release();
                     }

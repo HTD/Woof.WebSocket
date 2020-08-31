@@ -23,7 +23,7 @@ namespace Woof.WebSocket {
         /// <summary>
         /// Gets the message identifier.
         /// </summary>
-        public TMessageId Id { get; }
+        public TMessageId MessageId { get; }
 
         /// <summary>
         /// Gets a value indicating whether the CLOSE frame was received instead of a message.
@@ -71,7 +71,7 @@ namespace Woof.WebSocket {
         /// <param name="isSignatureValid">True, if the message signature is verified.</param>
         public DecodeResult(TTypeIndex typeId, TMessageId id, object message, bool isValidSignatureRequired = false, bool isSignatureValid = false) {
             TypeId = typeId;
-            Id = id;
+            MessageId = id;
             Message = message;
             IsSignatureValid = isSignatureValid;
             IsUnauthorized = isValidSignatureRequired && !isSignatureValid;
@@ -99,7 +99,7 @@ namespace Woof.WebSocket {
         /// <param name="exception">Exception while receiving the message.</param>
         public DecodeResult(TTypeIndex typeId, TMessageId id, Exception exception) {
             TypeId = typeId;
-            Id = id;
+            MessageId = id;
             Exception = exception;
         }
 
