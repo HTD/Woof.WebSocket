@@ -5,11 +5,11 @@ VisualStudioVersion = 16.0.30413.136
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Woof.WebSocket", "Woof.WebSocket.csproj", "{7EC82086-4DA7-45C9-8A74-3BB5D0B18D45}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Woof.WebSocket.Test.Api", "Woof.WebSocket.Test.Api\Woof.WebSocket.Test.Api.csproj", "{3D901040-A031-478B-8238-1F32A914D5FF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Woof.WebSocket.Test.Api", "Woof.WebSocket.Test.Api\Woof.WebSocket.Test.Api.csproj", "{3D901040-A031-478B-8238-1F32A914D5FF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Woof.WebSocket.Test.Server", "Woof.WebSocket.Test.Server\Woof.WebSocket.Test.Server.csproj", "{7FF97153-823F-4D51-B37D-F51E015796DC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Woof.WebSocket.Test.Server", "Woof.WebSocket.Test.Server\Woof.WebSocket.Test.Server.csproj", "{7FF97153-823F-4D51-B37D-F51E015796DC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Woof.WebSocket.Test.Client", "Woof.WebSocket.Test.Client\Woof.WebSocket.Test.Client.csproj", "{C9043C12-58ED-4FE5-8D1A-2E5BB663B6F2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Woof.WebSocket.Test.Client", "Woof.WebSocket.Test.Client\Woof.WebSocket.Test.Client.csproj", "{C9043C12-58ED-4FE5-8D1A-2E5BB663B6F2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
