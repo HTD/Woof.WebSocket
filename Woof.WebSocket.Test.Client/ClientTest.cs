@@ -20,6 +20,8 @@ namespace Woof.WebSocket.Test.Client {
         #endregion
 
         static async Task Main(string[] args) {
+            Client.StateChanged += Client_StateChanged;
+            Client.ReceiveException += Client_OnReceiveException;
             await Client.StartAsync();
             #region PING test
             Console.Write("Sending PING...");
@@ -84,6 +86,11 @@ namespace Woof.WebSocket.Test.Client {
             await WaitForCtrlCAsync();
             await Client.StopAsync();
         }
+
+        static void Client_StateChanged(object sender, StateChangedEventArgs e) => Console.WriteLine($"CLIENT STATE CHANGED: {e.State}");
+
+        static void Client_OnReceiveException(object sender, ExceptionEventArgs e) => Console.WriteLine($"CLIENT EXCEPTION: {e.Exception.Message}.");
+
 
         public static async Task WaitForCtrlCAsync(string message = "Press Ctrl+C to exit.") {
             using var semaphore = new SemaphoreSlim(0, 1);

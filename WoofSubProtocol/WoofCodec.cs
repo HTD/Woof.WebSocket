@@ -14,6 +14,8 @@ using DecodeResult = Woof.WebSocket.DecodeResult<int, System.Guid>;
 
 namespace Woof.WebSocket.WoofSubProtocol {
 
+    // TODO: Implement stream message type / stream mode with opening another WebSocket for it.
+
     /// <summary>
     /// Implements WOOF subprotocol codec.
     /// </summary>

@@ -1,17 +1,22 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 using Woof.WebSocket.Test.Api;
 
 namespace Woof.WebSocket.Test.Client {
-    
+
     public class TestClient : Woof.WebSocket.Client {
 
         public TestClient() {
             EndPointUri = Api.Properties.EndPointUri;
             Codec.LoadMessageTypes();
+            MessageReceived += TestClient_MessageReceived;
+        }
+
+        private void TestClient_MessageReceived(object sender, MessageReceivedEventArgs e) {
+            switch (e.DecodeResult.Message) {
+                case TimeNotification timeNotification: Console.WriteLine($"SERVER TIME: {timeNotification.Time}"); break;
+            }
         }
 
         public async Task PingAsync()
@@ -40,16 +45,6 @@ namespace Woof.WebSocket.Test.Client {
 
         public async Task<string> AskServerAsync(string question)
             => (await SendAndReceiveAsync<AuthenticatedRequest, AuthenticatedResponse>(new AuthenticatedRequest { Question = question })).Answer;
-
-        protected override void StateChanged(ServiceState state) => Console.WriteLine($"CLIENT STATE CHANGED: {state}");
-
-        protected override void MessageReceived(DecodeResult<int, Guid> decodeResult, WebSocketContext context, Guid guid) {
-            switch (decodeResult.Message) {
-                case TimeNotification timeNotification: Console.WriteLine($"SERVER TIME: {timeNotification.Time}"); break;
-            }
-        }
-
-        protected override void ReceiveException(Exception exception) => Console.WriteLine($"CLIENT EXCEPTION: {exception.Message}.");
 
     }
 

@@ -1,0 +1,1120 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Woof.WebSocket</name>
+    </assembly>
+    <members>
+        <member name="T:Woof.WebSocket.AsyncLoop">
+            <summary>
+            Allow starting an asynchronous loop in a new task.
+            </summary>
+        </member>
+        <member name="M:Woof.WebSocket.AsyncLoop.FromIterationAsync(System.Func{System.Threading.Tasks.Task},System.Threading.CancellationToken,System.Action{System.Exception},System.Func{System.Boolean},System.Boolean)">
+            <summary>
+            Creates a new task with an asynchronous loop using iteration asynchronous function.
+            </summary>
+            <param name="iteration">A function called on each loop iteration.</param>
+            <param name="token">Cancellation token used to end the loop.</param>
+            <param name="exceptionHandler">Exception handler for the iteration.</param>
+            <param name="condition">Optional condition that must evaluate true for the loop to continue or start.</param>
+            <param name="breakOnException">If set true, exceptions in iteration should break the loop.</param>
+            <returns>The started <see cref="T:System.Threading.Tasks.Task`1"/>.</returns>
+        </member>
+        <member name="T:Woof.WebSocket.Client">
+            <summary>
+            WebSocket client base providing a simple WebSocket API over the <see cref="T:Woof.WebSocket.WoofSubProtocol.WoofCodec"/>.
+            </summary>
+        </member>
+        <member name="E:Woof.WebSocket.Client.MessageReceived">
+            <summary>
+            Occurs when a message is received by the client.
+            </summary>
+        </member>
+        <member name="M:Woof.WebSocket.Client.OnMessageReceived(Woof.WebSocket.DecodeResult{System.Int32,System.Guid},Woof.WebSocket.WebSocketContext)">
+            <summary>
+            Handles <see cref="E:Woof.WebSocket.Client.MessageReceived"/> event.
+            </summary>
+            <param name="decodeResult">Message decoding result.</param>
+            <param name="context">WebSocket context.</param>
+        </member>
+        <member name="T:Woof.WebSocket.Client`3">
+            <summary>
+            WebSocket client base providing simple WebSocket transport and handshake over any given subprotocol.
+            </summary>
+        </member>
+        <member name="M:Woof.WebSocket.Client`3.StartAsync">
+            <summary>
+            Starts the client conection.
+            </summary>
+            <returns>Task completed when initialized and the receiving task is started.</returns>
+        </member>
+        <member name="M:Woof.WebSocket.Client`3.StopAsync">
+            <summary>
+            Stops the client connection.
+            </summary>
+            <returns>Task completed when all client tasks are stopped and the connection is closed.</returns>
+        </member>
+        <member name="M:Woof.WebSocket.Client`3.SendMessageAsync``1(``0,`1)">
+            <summary>
+            Sends a message to the server context.
+            </summary>
+            <typeparam name="T">Message type.</typeparam>
+            <param name="message">Message to send.</param>
+            <param name="id">Optional message identifier, if not set - new unique identifier will be used.</param>
+            <returns>Task completed when the sending is done.</returns>
+        </member>
+        <member name="M:Woof.WebSocket.Client`3.SendAndReceiveAsync``2(``0)">
+            <summary>
+            Sends a message to the server context and awaits until the response of the specified type is received.
+            </summary>
+            <typeparam name="TRequest">Request message type.</typeparam>
+            <typeparam name="TResponse">Response message type.</typeparam>
+            <param name="request">Request message.</param>
+            <returns>Task returning the response message.</returns>
+        </member>
+        <member name="M:Woof.WebSocket.Client`3.Dispose">
+            <summary>
+            Disposes all resources used by the client.
+            Closes the connection if not already closed.
+            </summary>
+        </member>
+        <member name="M:Woof.WebSocket.Client`3.OnCloseReceivedAsync(Woof.WebSocket.WebSocketContext)">
+            <summary>
+            Stops the client when the server is closed.
+            </summary>
+            <param name="context">WebSocket context.</param>
+            <returns>Task completed when the client is closed.</returns>
+        </member>
+        <member name="F:Woof.WebSocket.Client`3.Context">
+            <summary>
+            WebSocket context used to exchange binary data with the server.
+            </summary>
+        </member>
+        <member name="T:Woof.WebSocket.DecodeResult`2">
+            <summary>
+            Defines message decoding result.
+            </summary>
+            <typeparam name="TTypeIndex">Message type index type.</typeparam>
+            <typeparam name="TMessageId">Message identifier type.</typeparam>
+        </member>
+        <member name="P:Woof.WebSocket.DecodeResult`2.Message">
+            <summary>
+            Gets the decoded message.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.DecodeResult`2.TypeId">
+            <summary>
+            Gets the message type identifier.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.DecodeResult`2.Id">
+            <summary>
+            Gets the message identifier.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.DecodeResult`2.IsCloseFrame">
+            <summary>
+            Gets a value indicating whether the CLOSE frame was received instead of a message.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.DecodeResult`2.IsSignatureValid">
+            <summary>
+            Gets a value indicating whether the message signature is valid.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.DecodeResult`2.IsUnauthorized">
+            <summary>
+            Gets a value indicating whether the message is unauthorized:<br/>
+            It's not a sign-in message, it should be signed, but the signature is not valid.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.DecodeResult`2.IsSuccess">
+            <summary>
+            Gets a value indicating wheter the message was received correctly.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.DecodeResult`2.Exception">
+            <summary>
+            Gets an exception caught during receiving the message.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.DecodeResult`2.CloseStatus">
+            <summary>
+            Gets the WebSocket close status if the CLOSE frame was received.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.DecodeResult`2.CloseStatusDescription">
+            <summary>
+            Gets the WebSocket close status description if the CLOSE frame was received.
+            </summary>
+        </member>
+        <member name="M:Woof.WebSocket.DecodeResult`2.#ctor(`0,`1,System.Object,System.Boolean,System.Boolean)">
+            <summary>
+            Creates "full" decode result with the received and decoded message.
+            </summary>
+            <param name="typeId">Message type identifier.</param>
+            <param name="id">Message identifier.</param>
+            <param name="message">Message content.</param>
+            <param name="isValidSignatureRequired">True, if a valid signature of the message is required.</param>
+            <param name="isSignatureValid">True, if the message signature is verified.</param>
+        </member>
+        <member name="M:Woof.WebSocket.DecodeResult`2.#ctor(System.Net.WebSockets.WebSocketReceiveResult)">
+            <summary>
+            Creates "close" decode result from <see cref="T:System.Net.WebSockets.WebSocketReceiveResult"/>.
+            </summary>
+            <param name="receiveResult">"CLOSE" <see cref="T:System.Net.WebSockets.WebSocketReceiveResult"/></param>
+        </member>
+        <member name="M:Woof.WebSocket.DecodeResult`2.#ctor(`0,`1,System.Exception)">
+            <summary>
+            Creates error decode result when the message metadata is read.
+            </summary>
+            <param name="typeId">Message type identifier.</param>
+            <param name="id">Message identifier.</param>
+            <param name="exception">Exception while receiving the message.</param>
+        </member>
+        <member name="M:Woof.WebSocket.DecodeResult`2.#ctor(System.Exception)">
+            <summary>
+            Creates error decode result when the message metadata could not be read.
+            </summary>
+            <param name="exception"></param>
+        </member>
+        <member name="T:Woof.WebSocket.ExceptionEventArgs">
+            <summary>
+            Event data for the exception events.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.ExceptionEventArgs.Exception">
+            <summary>
+            Gets the exception that triggered the event.
+            </summary>
+        </member>
+        <member name="M:Woof.WebSocket.ExceptionEventArgs.#ctor(System.Exception)">
+            <summary>
+            Creates new event data for exception events.
+            Extracts the inner-most exception that is most probable cause of the problem.
+            </summary>
+            <param name="exception">Exception that triggered the event.</param>
+        </member>
+        <member name="T:Woof.WebSocket.IAuthenticationProvider">
+            <summary>
+            Implement this to allow ansynchronous authentication of the API key.
+            </summary>
+        </member>
+        <member name="M:Woof.WebSocket.IAuthenticationProvider.GetKeyAsync(System.Byte[])">
+            <summary>
+            Gets the message signing key from the API key.
+            </summary>
+            <param name="apiKey">API key.</param>
+            <returns>Message signing key or null if not authenticated.</returns>
+        </member>
+        <member name="T:Woof.WebSocket.ISession">
+            <summary>
+            A session having a message signing key.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.ISession.Key">
+            <summary>
+            Gets or sets a message signing key for the session.
+            </summary>
+        </member>
+        <member name="T:Woof.WebSocket.IStateProvider">
+            <summary>
+            Provides <see cref="P:Woof.WebSocket.IStateProvider.SessionProvider"/> and <see cref="P:Woof.WebSocket.IStateProvider.AuthenticationProvider"/> services.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.IStateProvider.SessionProvider">
+            <summary>
+            Provides session management for both client and server.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.IStateProvider.AuthenticationProvider">
+            <summary>
+            Gets or sets a module that allows ansynchronous authentication of the API key.
+            </summary>
+        </member>
+        <member name="T:Woof.WebSocket.MessageReceivedEventArgs">
+            <summary>
+            Event data for the WebSocket MessageReceived events. (WOOF subprotocol version).
+            </summary>
+        </member>
+        <member name="M:Woof.WebSocket.MessageReceivedEventArgs.#ctor(Woof.WebSocket.DecodeResult{System.Int32,System.Guid},Woof.WebSocket.WebSocketContext)">
+            <summary>
+            Creates new data for WebSocket MessageReceived events.
+            </summary>
+            <param name="decodeResult"></param>
+            <param name="context"></param>
+        </member>
+        <member name="T:Woof.WebSocket.MessageReceivedEventArgs`2">
+            <summary>
+            Event data for the WebSocket MessageReceived events.
+            </summary>
+            <typeparam name="TTypeIndex">Message type index type.</typeparam>
+            <typeparam name="TMessageId">Message identifier type.</typeparam>
+        </member>
+        <member name="P:Woof.WebSocket.MessageReceivedEventArgs`2.Message">
+            <summary>
+            Gets the decoded message.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.MessageReceivedEventArgs`2.DecodeResult">
+            <summary>
+            Gets the additional message metadata.
+            </summary>
+        </member>
+        <member name="M:Woof.WebSocket.MessageReceivedEventArgs`2.#ctor(Woof.WebSocket.DecodeResult{`0,`1},Woof.WebSocket.WebSocketContext)">
+            <summary>
+            Creates new WebSocket MessageReceived event data.
+            </summary>
+            <param name="decodeResult">Message decoding result.</param>
+            <param name="context">WebSocket context.</param>
+        </member>
+        <member name="T:Woof.WebSocket.MessageTypeContext">
+            <summary>
+            Message type with some metadata.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.MessageTypeContext.MessageType">
+            <summary>
+            Gets the message type.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.MessageTypeContext.IsSigned">
+            <summary>
+            Gets a value indicating whether the message should be signed.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.MessageTypeContext.IsSignInRequest">
+            <summary>
+            Gets a value indicating whether the message is a sign in request.
+            </summary>
+        </member>
+        <member name="M:Woof.WebSocket.MessageTypeContext.#ctor(System.Type,System.Boolean,System.Boolean)">
+            <summary>
+            Creates a new message type context.
+            </summary>
+            <param name="messageType">Message type.</param>
+            <param name="isSigned">True if message should be signed.</param>
+            <param name="isSignInRequest">True if the message is a sign in request.</param>
+        </member>
+        <member name="T:Woof.WebSocket.MessageTypeDictionary`1">
+            <summary>
+            Message type dictionary used to resolve message type from type identifier read from message header.
+            </summary>
+            <typeparam name="TTypeIndex">Message type index type.</typeparam>
+        </member>
+        <member name="M:Woof.WebSocket.MessageTypeDictionary`1.GetTypeId``1">
+            <summary>
+            Gets the type identifier for the specified type if defined.
+            </summary>
+            <typeparam name="TMessage">Message type.</typeparam>
+            <returns>Type identifier.</returns>
+            <exception cref="T:System.InvalidOperationException">Thrown when the type does not exists in the dictionary.</exception>
+        </member>
+        <member name="T:Woof.WebSocket.MessageTypeDictionary">
+            <summary>
+            Message type dictionary used to resolve message type from type identifier read from message header.
+            </summary>
+        </member>
+        <member name="T:Woof.WebSocket.RequestIncompleteCollection">
+            <summary>
+            A collection used for matching response messages to the request messages.
+            </summary>
+        </member>
+        <member name="M:Woof.WebSocket.RequestIncompleteCollection.#ctor(Woof.WebSocket.SubProtocolCodec{System.Guid,System.Int32})">
+            <summary>
+            Creates a new instance for codec.
+            </summary>
+            <param name="codec">Codec instance.</param>
+        </member>
+        <member name="T:Woof.WebSocket.RequestIncompleteCollection`2">
+            <summary>
+            A collection used for matching response messages to the request messages.
+            </summary>
+            <typeparam name="TTypeIndex">Message type index type.</typeparam>
+            <typeparam name="TMessageId">Message identifier type.</typeparam>
+        </member>
+        <member name="P:Woof.WebSocket.RequestIncompleteCollection`2.Codec">
+            <summary>
+            Gets the subprotocol codec.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.RequestIncompleteCollection`2.NewResponseSynchronizer">
+            <summary>
+            Gets a new response pack with a new identifier.
+            </summary>
+        </member>
+        <member name="M:Woof.WebSocket.RequestIncompleteCollection`2.#ctor(Woof.WebSocket.SubProtocolCodec{`0,`1})">
+            <summary>
+            Creates the collection for the specified codec.
+            </summary>
+            <param name="codec">Subprotocol codec.</param>
+        </member>
+        <member name="M:Woof.WebSocket.RequestIncompleteCollection`2.TryRemoveResponseSynchronizer(`1,Woof.WebSocket.ResponseSynchronizer@)">
+            <summary>
+            Try to remove the response synchronizer pointed with <paramref name="id"/> from the collection and return it.
+            </summary>
+            <param name="id">Message identifier.</param>
+            <param name="responseSynchronizer">Response synchronizer.</param>
+            <returns>True, if the response synchronizer was stored in the collection.</returns>
+        </member>
+        <member name="M:Woof.WebSocket.RequestIncompleteCollection`2.Dispose">
+            <summary>
+            Disposes all disposable values inside the collection.
+            </summary>
+        </member>
+        <member name="T:Woof.WebSocket.ResponseSynchronizer">
+            <summary>
+            A special container to get the response matched to the request
+            and the semaphore used to synchronize sending thread with the receiving thread.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.ResponseSynchronizer.Message">
+            <summary>
+            Gets or sets the message object.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.ResponseSynchronizer.IsValid">
+            <summary>
+            Gets or sets a value indicating whether the message is valid.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.ResponseSynchronizer.Semaphore">
+            <summary>
+            Gets the semaphore used to synchronize the sending and receiving threads.
+            </summary>
+        </member>
+        <member name="M:Woof.WebSocket.ResponseSynchronizer.#ctor">
+            <summary>
+            Creates new, empty response pack.
+            </summary>
+        </member>
+        <member name="M:Woof.WebSocket.ResponseSynchronizer.Dispose">
+            <summary>
+            Disposes the underlying semaphore, releases it if applicable first, not to block awaiting sending thread.
+            </summary>
+        </member>
+        <member name="T:Woof.WebSocket.Server">
+            <summary>
+            WebSocket server base providing a simple WebSocket API over the <see cref="T:Woof.WebSocket.WoofSubProtocol.WoofCodec"/>.<br/>
+            </summary>
+        </member>
+        <member name="E:Woof.WebSocket.Server.MessageReceived">
+            <summary>
+            Occurs when a message is received by the server.
+            </summary>
+        </member>
+        <member name="M:Woof.WebSocket.Server.OnMessageReceived(Woof.WebSocket.DecodeResult{System.Int32,System.Guid},Woof.WebSocket.WebSocketContext)">
+            <summary>
+            Handles <see cref="E:Woof.WebSocket.Server.MessageReceived"/> event.
+            </summary>
+            <param name="decodeResult">Message decoding result.</param>
+            <param name="context">WebSocket context.</param>
+        </member>
+        <member name="T:Woof.WebSocket.Server`3">
+            <summary>
+            WebSocket server base providing simple WebSocket transport and handshake over any given subprotocol.
+            </summary>
+        </member>
+        <member name="E:Woof.WebSocket.Server`3.ClientConnected">
+            <summary>
+            Occurs when a client is connected to the server.
+            </summary>
+        </member>
+        <member name="E:Woof.WebSocket.Server`3.ClientDisconnecting">
+            <summary>
+            Occurs when a client is disconnecting from the server it's the last time the client data is available.<br/>
+            The connection is not closed until all handlers complete.
+            </summary>
+        </member>
+        <member name="E:Woof.WebSocket.Server`3.ConnectException">
+            <summary>
+            Occurs when an exception is thrown during client connection process.
+            </summary>
+        </member>
+        <member name="M:Woof.WebSocket.Server`3.StartAsync">
+            <summary>
+            Starts the server.
+            </summary>
+            <returns>Task completed when the server is initialized and in listening state.</returns>
+        </member>
+        <member name="M:Woof.WebSocket.Server`3.StopAsync">
+            <summary>
+            Stops the server.
+            </summary>
+            <returns>Task completed when all server tasks are stopped and all connections are closed.</returns>
+        </member>
+        <member name="M:Woof.WebSocket.Server`3.SendMessageAsync``1(``0,Woof.WebSocket.WebSocketContext,`1)">
+            <summary>
+            Sends a message to the specified context.
+            </summary>
+            <typeparam name="T">Type of the message.</typeparam>
+            <param name="message">Message to send.</param>
+            <param name="context">Target context.</param>
+            <param name="id">Optional message identifier, if not set - new unique identifier will be used.</param>
+            <returns>Task completed when the sending is done.</returns>
+        </member>
+        <member name="M:Woof.WebSocket.Server`3.SendAndReceiveAsync``2(``0,Woof.WebSocket.WebSocketContext)">
+            <summary>
+            Sends a message to the specified context and awaits until the response of the specified type is received.
+            </summary>
+            <typeparam name="TRequest">Request message type.</typeparam>
+            <typeparam name="TResponse">Response message type.</typeparam>
+            <param name="request">Request message.</param>
+            <param name="context">Target context.</param>
+            <returns>Task returning the response message.</returns>
+        </member>
+        <member name="M:Woof.WebSocket.Server`3.BroadcastMessageAsync``1(``0)">
+            <summary>
+            Sends a message to all connected clients.
+            </summary>
+            <typeparam name="T">Type of the message.</typeparam>
+            <param name="message">Message to send.</param>
+        </member>
+        <member name="M:Woof.WebSocket.Server`3.Dispose">
+            <summary>
+            Disposes all resources used by the server.
+            Closes all connections if not closed already.
+            </summary>
+        </member>
+        <member name="M:Woof.WebSocket.Server`3.OnClientConnectedAsync">
+            <summary>
+            Called when a client is connected.
+            </summary>
+            <returns>Task completed when receiving loop is started.</returns>
+        </member>
+        <member name="M:Woof.WebSocket.Server`3.OnClientDisconnectedAsync(Woof.WebSocket.WebSocketContext)">
+            <summary>
+            Called when a client is disconnected. Closes, disposes and removes the disconnected client's socket.
+            </summary>
+            <param name="context">WebSocket context.</param>
+            <returns>Task completed when the socket is closed, disposed and removed.</returns>
+        </member>
+        <member name="M:Woof.WebSocket.Server`3.OnConnectException(System.Exception)">
+            <summary>
+            Called when the exception occurs during connecting a client.
+            </summary>
+            <param name="exception"></param>
+        </member>
+        <member name="F:Woof.WebSocket.Server`3.Clients">
+            <summary>
+            Socket contexts of the clients currently connected to the server.
+            </summary>
+        </member>
+        <member name="F:Woof.WebSocket.Server`3.RxWS">
+            <summary>
+            A regular expression matching WebSocket protocol URI part.
+            </summary>
+        </member>
+        <member name="F:Woof.WebSocket.Server`3.Listener">
+            <summary>
+            A <see cref="T:System.Net.HttpListener"/> used to listen for incomming connections.
+            </summary>
+        </member>
+        <member name="T:Woof.WebSocket.ServiceState">
+            <summary>
+            A basic state that a client or server class can have.
+            </summary>
+        </member>
+        <member name="F:Woof.WebSocket.ServiceState.Stopped">
+            <summary>
+            Stopped, not started, initial state.
+            </summary>
+        </member>
+        <member name="F:Woof.WebSocket.ServiceState.Starting">
+            <summary>
+            During the start-up sequence process.
+            </summary>
+        </member>
+        <member name="F:Woof.WebSocket.ServiceState.Started">
+            <summary>
+            Started, fully operational.
+            </summary>
+        </member>
+        <member name="F:Woof.WebSocket.ServiceState.Stopping">
+            <summary>
+            During the shut-down sequence process.
+            </summary>
+        </member>
+        <member name="T:Woof.WebSocket.SessionCollection">
+            <summary>
+            A collection for storing and retrieving optionally disposable sessions.
+            </summary>
+        </member>
+        <member name="M:Woof.WebSocket.SessionCollection.Remove(System.Int64)">
+            <summary>
+            Removes the session with given identifier if it exists in the collection.
+            When the session implements <see cref="T:System.IDisposable"/> it will be disposed first.
+            </summary>
+            <param name="id">Session identifier.</param>
+        </member>
+        <member name="M:Woof.WebSocket.SessionCollection.Dispose">
+            <summary>
+            Disposes all disposable sessions and clears the collection.
+            </summary>
+        </member>
+        <member name="T:Woof.WebSocket.SessionProvider">
+            <summary>
+            Provides session management for both client and server.
+            </summary>
+        </member>
+        <member name="M:Woof.WebSocket.SessionProvider.OpenSession(Woof.WebSocket.WebSocketContext)">
+            <summary>
+            Initializes session identifier for the current client context.<br/>
+            Switches <see cref="T:Woof.WebSocket.SessionProvider"/> to SERVER mode / multiple sessions.
+            </summary>
+            <param name="context">WebSocket from the connected client.</param>
+        </member>
+        <member name="M:Woof.WebSocket.SessionProvider.CloseSession(Woof.WebSocket.WebSocketContext)">
+            <summary>
+            Removes and disposes session opened with <see cref="M:Woof.WebSocket.SessionProvider.OpenSession(Woof.WebSocket.WebSocketContext)"/>.
+            </summary>
+            <param name="context">WebSocket from the connected client.</param>
+        </member>
+        <member name="M:Woof.WebSocket.SessionProvider.CloseAllSessions">
+            <summary>
+            Removes and disposes all sessions opened with <see cref="M:Woof.WebSocket.SessionProvider.OpenSession(Woof.WebSocket.WebSocketContext)"/>.
+            </summary>
+        </member>
+        <member name="M:Woof.WebSocket.SessionProvider.GetSession``1(Woof.WebSocket.WebSocketContext)">
+            <summary>
+            Gets a session for the current client connection.<br/>
+            If the session doesn't exist it's created with an empty constructor.
+            </summary>
+            <typeparam name="TSession">Session type.</typeparam>
+            <param name="context">WebSocket from the connected client. Or null for the client single session.</param>
+            <returns>Session object.</returns>
+        </member>
+        <member name="M:Woof.WebSocket.SessionProvider.GetKey(Woof.WebSocket.WebSocketContext)">
+            <summary>
+            Gets the message signing key associated with the current session.
+            </summary>
+            <param name="context">WebSocket from the connected client.</param>
+            <returns>Message signing key.</returns>
+        </member>
+        <member name="T:Woof.WebSocket.StateChangedEventArgs">
+            <summary>
+            Data for service state changed events.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.StateChangedEventArgs.State">
+            <summary>
+            Gets the state of the client or server service.
+            </summary>
+        </member>
+        <member name="M:Woof.WebSocket.StateChangedEventArgs.#ctor(Woof.WebSocket.ServiceState)">
+            <summary>
+            Creates new data for the sevice state changed events.
+            </summary>
+            <param name="state"></param>
+        </member>
+        <member name="T:Woof.WebSocket.SubProtocolCodec`2">
+            <summary>
+            An interface of subprotocol codecs for WebSocket servers and clients.<br/>
+            Allows implementing virtually any subprotocol for a WebSocket API.
+            </summary>
+            <typeparam name="TTypeIndex">Message type index type.</typeparam>
+            <typeparam name="TMessageId">Message identifier type.</typeparam>
+        </member>
+        <member name="P:Woof.WebSocket.SubProtocolCodec`2.State">
+            <summary>
+            Gets or sets the state used to access <see cref="T:Woof.WebSocket.SessionProvider"/> and <see cref="T:Woof.WebSocket.IAuthenticationProvider"/>.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.SubProtocolCodec`2.SubProtocol">
+            <summary>
+            Gets the subprotocol name.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.SubProtocolCodec`2.NewId">
+            <summary>
+            Gets the new unique message identifier.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.SubProtocolCodec`2.MessageTypes">
+            <summary>
+            Gets the message types available in the API.
+            </summary>
+        </member>
+        <member name="M:Woof.WebSocket.SubProtocolCodec`2.LoadMessageTypes">
+            <summary>
+            Loads message types.
+            </summary>
+        </member>
+        <member name="M:Woof.WebSocket.SubProtocolCodec`2.DecodeMessageAsync(Woof.WebSocket.WebSocketContext,System.Threading.CancellationToken,System.Int32)">
+            <summary>
+            Reads and decodes a message from the WebSocket context.
+            </summary>
+            <param name="context">WebSocket context.</param>
+            <param name="token">Cancellation token.</param>
+            <param name="limit">Optional message length limit, applied if positive value provided.</param>
+            <returns>Task returning decoded message with the identifier.</returns>
+        </member>
+        <member name="M:Woof.WebSocket.SubProtocolCodec`2.EncodeMessageAsync``1(Woof.WebSocket.WebSocketContext,System.Threading.CancellationToken,``0,`1)">
+            <summary>
+            Encodes the message and sends it to the WebSocket context.
+            </summary>
+            <typeparam name="TMessage">Message type.</typeparam>
+            <param name="context">WebSocket context.</param>
+            <param name="token">Cancellation token.</param>
+            <param name="message">Message to send.</param>
+            <param name="id">Optional message identifier, if not set - new unique identifier will be used.</param>
+            <returns>Task completed when the message is sent.</returns>
+        </member>
+        <member name="M:Woof.WebSocket.SubProtocolCodec`2.Sign(System.ArraySegment{System.Byte},System.Byte[])">
+            <summary>
+            Signs a serialized message payload with a type of HMAC algorithm.
+            </summary>
+            <param name="message">Binary message payload.</param>
+            <param name="key">Message signing key.</param>
+            <returns>Message signature.</returns>
+        </member>
+        <member name="M:Woof.WebSocket.SubProtocolCodec`2.GetHash(System.Byte[])">
+            <summary>
+            Gets a hash of a key.
+            </summary>
+            <param name="apiKey"></param>
+            <returns>Hash bytes.</returns>
+        </member>
+        <member name="M:Woof.WebSocket.SubProtocolCodec`2.GetKey">
+            <summary>
+            Gets a new key.
+            </summary>
+            <returns>Key bytes.</returns>
+        </member>
+        <member name="M:Woof.WebSocket.SubProtocolCodec`2.GetKey(System.String)">
+            <summary>
+            Gets a key from string.
+            </summary>
+            <param name="keyString">Key string.</param>
+            <returns>Key bytes.</returns>
+        </member>
+        <member name="M:Woof.WebSocket.SubProtocolCodec`2.GetKeyString(System.Byte[])">
+            <summary>
+            Gets a key string from key bytes.
+            </summary>
+            <param name="key">Key bytes.</param>
+            <returns>Key string.</returns>
+        </member>
+        <member name="T:Woof.WebSocket.UnexpectedMessageException">
+            <summary>
+            A type of exception that is thrown when a defined, but unexpected message type is received.<br/>
+            </summary>
+        </member>
+        <member name="M:Woof.WebSocket.UnexpectedMessageException.#ctor(System.Object)">
+            <summary>
+            Creates the exception from the message received.
+            </summary>
+            <param name="message">Decoded message received.</param>
+        </member>
+        <member name="P:Woof.WebSocket.UnexpectedMessageException.Message">
+            <summary>
+            Gets the decoded message received instead of the expected message.
+            </summary>
+        </member>
+        <member name="T:Woof.WebSocket.WebSocketContext">
+            <summary>
+            Thread-safe, extended WebSocket context.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.WebSocketContext.IsOpen">
+            <summary>
+            Gets a value indicating whether the underlying <see cref="T:System.Net.WebSockets.WebSocket"/> is open.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.WebSocketContext.HttpContext">
+            <summary>
+            Gets the <see cref="T:System.Net.WebSockets.HttpListenerWebSocketContext"/> if the socket was obtained from <see cref="T:System.Net.HttpListener"/>.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.WebSocketContext.CloseStatusDescription">
+            <summary>
+            Allows the remote endpoint to describe the reason why the connection was closed.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.WebSocketContext.CloseStatus">
+            <summary>
+            Indicates the reason why the remote endpoint initiated the close handshake.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.WebSocketContext.State">
+            <summary>
+            Returns the current state of the WebSocket connection.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.WebSocketContext.SubProtocol">
+            <summary>
+            The subprotocol that was negotiated during the opening handshake.
+            </summary>
+        </member>
+        <member name="M:Woof.WebSocket.WebSocketContext.#ctor(System.Net.WebSockets.WebSocket)">
+            <summary>
+            Cretes the context from the <see cref="T:System.Net.WebSockets.WebSocket"/>.
+            </summary>
+            <param name="socket">Base socket.</param>
+        </member>
+        <member name="M:Woof.WebSocket.WebSocketContext.#ctor(System.Net.WebSockets.HttpListenerWebSocketContext)">
+            <summary>
+            Creates the context from the <see cref="T:System.Net.WebSockets.HttpListenerWebSocketContext"/>.
+            </summary>
+            <param name="httpContext">HTTP context.</param>
+        </member>
+        <member name="M:Woof.WebSocket.WebSocketContext.Abort">
+            <summary>
+            Aborts the WebSocket connection and cancels any pending IO operations.
+            </summary>
+        </member>
+        <member name="M:Woof.WebSocket.WebSocketContext.CloseAsync(System.Net.WebSockets.WebSocketCloseStatus,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Closes the WebSocket connection as an asynchronous operation using the close
+            handshake defined in the WebSocket protocol specification section 7.
+            </summary>
+            <param name="closeStatus">Indicates the reason for closing the WebSocket connection.</param>
+            <param name="statusDescription">Specifies a human readable explanation as to why the connection is closed.</param>
+            <param name="cancellationToken">The token that can be used to propagate notification that operations should be canceled.</param>
+            <returns>Task completed when connection is closed.</returns>
+        </member>
+        <member name="M:Woof.WebSocket.WebSocketContext.CloseOutputAsync(System.Net.WebSockets.WebSocketCloseStatus,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Initiates or completes the close handshake defined in the WebSocket protocol specification section 7.
+            </summary>
+            <param name="closeStatus">Indicates the reason for closing the WebSocket connection.</param>
+            <param name="statusDescription">Allows applications to specify a human readable explanation as to why the connection is closed.</param>
+            <param name="cancellationToken">The token that can be used to propagate notification that operations should be canceled.</param>
+            <returns>Task completed when the CLOSE frame is sent.</returns>
+        </member>
+        <member name="M:Woof.WebSocket.WebSocketContext.ReceiveAsync(System.ArraySegment{System.Byte},System.Threading.CancellationToken)">
+            <summary>
+            Receives data from the <see cref="T:System.Net.WebSockets.WebSocket"/> connection asynchronously.
+            </summary>
+            <param name="buffer">References the application buffer that is the storage location for the received data.</param>
+            <param name="cancellationToken">Propagates the notification that operations should be canceled.</param>
+            <returns>Task returning received data.</returns>
+        </member>
+        <member name="M:Woof.WebSocket.WebSocketContext.SendAsync(System.ArraySegment{System.Byte},System.Net.WebSockets.WebSocketMessageType,System.Boolean,System.Threading.CancellationToken)">
+            <summary>
+            Sends data over the <see cref="T:System.Net.WebSockets.WebSocket"/> connection asynchronously.
+            </summary>
+            <param name="buffer">The buffer to be sent over the connection.</param>
+            <param name="messageType">Indicates whether the application is sending a binary or text message.</param>
+            <param name="endOfMessage">Indicates whether the data in "buffer" is the last part of a message.</param>
+            <param name="cancellationToken">The token that propagates the notification that operations should be canceled.</param>
+            <returns>Task completed when the sending is done.</returns>
+        </member>
+        <member name="M:Woof.WebSocket.WebSocketContext.SendAsync(System.Collections.Generic.IEnumerable{System.ArraySegment{System.Byte}},System.Net.WebSockets.WebSocketMessageType,System.Threading.CancellationToken)">
+            <summary>
+            Sends multiple buffers over the <see cref="T:System.Net.WebSockets.WebSocket"/> connection asynchronously.<br/>
+            All send operations will be called uninterrupted in one thread.
+            </summary>
+            <param name="buffers">The buffers to be sent over the connection.</param>
+            <param name="messageType">Indicates whether the application is sending a binary or text message.</param>
+            <param name="cancellationToken">The token that propagates the notification that operations should be canceled.</param>
+            <returns>Task completed when the sending is done.</returns>
+        </member>
+        <member name="M:Woof.WebSocket.WebSocketContext.Dispose">
+            <summary>
+            Disposes the semaphore and the socket.
+            </summary>
+        </member>
+        <member name="F:Woof.WebSocket.WebSocketContext.Socket">
+            <summary>
+            The actual <see cref="T:System.Net.WebSockets.WebSocket"/>.
+            </summary>
+        </member>
+        <member name="F:Woof.WebSocket.WebSocketContext.Semaphore">
+            <summary>
+            The <see cref="T:System.Threading.SemaphoreSlim"/> used to limit the access to the socket for the one thread.<br/>
+            It should be awaited before each send operation and released after the operation completes.
+            </summary>
+        </member>
+        <member name="T:Woof.WebSocket.WebSocketEventArgs">
+            <summary>
+            Event data for WebSocket context events.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.WebSocketEventArgs.Context">
+            <summary>
+            Gets the WebSocket context.
+            </summary>
+        </member>
+        <member name="M:Woof.WebSocket.WebSocketEventArgs.#ctor(Woof.WebSocket.WebSocketContext)">
+            <summary>
+            Creates WebSocket context event data.
+            </summary>
+            <param name="context">WebSocket context.</param>
+        </member>
+        <member name="T:Woof.WebSocket.WebSocketTransport`3">
+            <summary>
+            WebSocket transport base class to be used by both clients and servers.
+            </summary>
+            <typeparam name="TMessageId">Message identifier type.</typeparam>
+            <typeparam name="TTypeIndex">Message type index type.</typeparam>
+            <typeparam name="TCodec">Message codec implementing the subprotocol.</typeparam>
+        </member>
+        <member name="E:Woof.WebSocket.WebSocketTransport`3.MessageReceived">
+            <summary>
+            Occurs when a message is received by the socket.
+            </summary>
+        </member>
+        <member name="E:Woof.WebSocket.WebSocketTransport`3.ReceiveException">
+            <summary>
+            Occurs when an exception is thrown during receive process.
+            </summary>
+        </member>
+        <member name="E:Woof.WebSocket.WebSocketTransport`3.StateChanged">
+            <summary>
+            Occurs when the state of the client or server service is changed.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.WebSocketTransport`3.SessionProvider">
+            <summary>
+            Gets the module providing session management for both client and server.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.WebSocketTransport`3.AuthenticationProvider">
+            <summary>
+            A module providing API key authentication asynchronous method.<br/>
+            <see cref="T:Woof.WebSocket.IAuthenticationProvider"/> implementation is necessary for built-in API key authentication support.<br/>
+            <strong>This is not set by default.</strong>
+            </summary>
+        </member>
+        <member name="M:Woof.WebSocket.WebSocketTransport`3.#ctor">
+            <summary>
+            Initializes the transport with the codec and request completion instances.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.WebSocketTransport`3.CancellationToken">
+            <summary>
+            Gets the cancellation token used for the client or server instance.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.WebSocketTransport`3.Codec">
+            <summary>
+            Gets the subprotocol codec.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.WebSocketTransport`3.EndPointUri">
+            <summary>
+            Gets the WebSocket end point URI.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.WebSocketTransport`3.RequestsIncomplete">
+            <summary>
+            A collection of incomplete requests requiring the other party's response.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.WebSocketTransport`3.State">
+            <summary>
+            Gets the current client or server state.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.WebSocketTransport`3.MaxReceiveMessageSize">
+            <summary>
+            Gets the limit of the message size that can be received (default 1MB).<br/>
+            Override to zero or a negative number to remove the limitation (unsafe).<br/>
+            </summary>
+        </member>
+        <member name="M:Woof.WebSocket.WebSocketTransport`3.OnMessageReceived(Woof.WebSocket.DecodeResult{`0,`1},Woof.WebSocket.WebSocketContext)">
+            <summary>
+            Invokes <see cref="E:Woof.WebSocket.WebSocketTransport`3.MessageReceived"/> event.
+            </summary>
+            <param name="decodeResult">Message decoding result.</param>
+            <param name="context">WebSocket context, that can be used to send the response to.</param>
+            <returns>Task completed when the message handling is done.</returns>
+        </member>
+        <member name="M:Woof.WebSocket.WebSocketTransport`3.OnReceiveException(System.Exception)">
+            <summary>
+            Invokes <see cref="E:Woof.WebSocket.WebSocketTransport`3.ReceiveException"/> event.
+            </summary>
+            <param name="exception">Exception passed.</param>
+        </member>
+        <member name="M:Woof.WebSocket.WebSocketTransport`3.OnStateChanged(Woof.WebSocket.ServiceState)">
+            <summary>
+            Invokes <see cref="E:Woof.WebSocket.WebSocketTransport`3.StateChanged"/> event.
+            </summary>
+        </member>
+        <member name="M:Woof.WebSocket.WebSocketTransport`3.Receive(Woof.WebSocket.WebSocketContext)">
+            <summary>
+            Reads binary messages from the socket, deserializes them and triggers <see cref="E:Woof.WebSocket.WebSocketTransport`3.MessageReceived"/> event.
+            </summary>
+            <param name="context">WebSocket context.</param>
+            <returns>Receive loop task.</returns>
+        </member>
+        <member name="M:Woof.WebSocket.WebSocketTransport`3.StartReceiveAsync(Woof.WebSocket.WebSocketContext,System.Threading.CancellationToken,System.Func{Woof.WebSocket.WebSocketContext,System.Threading.Tasks.Task})">
+            <summary>
+            Starts the receiving task for the specified context.
+            </summary>
+            <param name="context">WebSocket context.</param>
+            <param name="token">Cancellation token used to cancel the task created.</param>
+            <param name="cleanUpAsync">Optional asynchronous clean up function executed after the receiving loop is ended.</param>
+            <returns>Created task.</returns>
+        </member>
+        <member name="M:Woof.WebSocket.WebSocketTransport`3.SendMessageAsync``1(``0,Woof.WebSocket.WebSocketContext,`1)">
+            <summary>
+            Serializes and sends a message to the specified context.
+            </summary>
+            <typeparam name="TMessage">Message type.</typeparam>
+            <param name="message">Message to send.</param>
+            <param name="context">Target context.</param>
+            <param name="id">Optional message identifier, if not set - new unique identifier will be used.</param>
+            <returns>Task completed when the sending is done.</returns>
+        </member>
+        <member name="M:Woof.WebSocket.WebSocketTransport`3.SendAndReceiveAsync``2(``0,Woof.WebSocket.WebSocketContext)">
+            <summary>
+            Sends a message to the specified context and awaits until the response of the specified type is received.
+            </summary>
+            <typeparam name="TRequest">Request message type.</typeparam>
+            <typeparam name="TResponse">Response message type.</typeparam>
+            <param name="request">Request message.</param>
+            <param name="context">Target context.</param>
+            <returns>Task returning the response message.</returns>
+            <exception cref="T:Woof.WebSocket.UnexpectedMessageException">Thrown when a defined, but unexpected type message is received instead of expected one.</exception>
+            <exception cref="T:System.Threading.Tasks.TaskCanceledException">Thrown when the client or server operation is cancelled.</exception>
+        </member>
+        <member name="F:Woof.WebSocket.WebSocketTransport`3.CTS">
+            <summary>
+            A cancellation token source used to cancel all the client and server tasks.
+            </summary>
+        </member>
+        <member name="T:Woof.WebSocket.WoofSubProtocol.ISignInRequest">
+            <summary>
+            Implement in sign in request to make the request automatically match the message signing key with the API key.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.WoofSubProtocol.ISignInRequest.ApiKey">
+            <summary>
+            Gets the API key sent in the request.
+            </summary>
+        </member>
+        <member name="T:Woof.WebSocket.WoofSubProtocol.MessageAttribute">
+            <summary>
+            Assigns a type identifier to a class.
+            </summary>
+        </member>
+        <member name="M:Woof.WebSocket.WoofSubProtocol.MessageAttribute.#ctor(System.Int32)">
+            <summary>
+            Creates new message type attribute.
+            </summary>
+            <param name="id">Message type identifier.</param>
+        </member>
+        <member name="P:Woof.WebSocket.WoofSubProtocol.MessageAttribute.MessageTypeId">
+            <summary>
+            Gets the message type identifier.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.WoofSubProtocol.MessageAttribute.IsSigned">
+            <summary>
+            Gets the value indicating whether the message is required to be signed.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.WoofSubProtocol.MessageAttribute.IsSignInRequest">
+            <summary>
+            Gets the value indicating whether the message is a special sign-in message.
+            </summary>
+        </member>
+        <member name="T:Woof.WebSocket.WoofSubProtocol.MessageMetadata">
+            <summary>
+            Messge metadata header part.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.WoofSubProtocol.MessageMetadata.TypeId">
+            <summary>
+            Message type identifier.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.WoofSubProtocol.MessageMetadata.Id">
+            <summary>
+            Message identifier.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.WoofSubProtocol.MessageMetadata.PayloadLength">
+            <summary>
+            Message payload length.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.WoofSubProtocol.MessageMetadata.Signature">
+            <summary>
+            Optional message signature.
+            </summary>
+        </member>
+        <member name="T:Woof.WebSocket.WoofSubProtocol.WoofCodec">
+            <summary>
+            Implements WOOF subprotocol codec.
+            </summary>
+        </member>
+        <member name="F:Woof.WebSocket.WoofSubProtocol.WoofCodec.Name">
+            <summary>
+            Common subprotocol name.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.WoofSubProtocol.WoofCodec.SubProtocol">
+            <summary>
+            Gets the subprotocol name.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.WoofSubProtocol.WoofCodec.NewId">
+            <summary>
+            Gets the new unique message id.
+            </summary>
+        </member>
+        <member name="M:Woof.WebSocket.WoofSubProtocol.WoofCodec.LoadMessageTypes">
+            <summary>
+            Loads message types from the current application domain assemblies.
+            </summary>
+        </member>
+        <member name="M:Woof.WebSocket.WoofSubProtocol.WoofCodec.DecodeMessageAsync(Woof.WebSocket.WebSocketContext,System.Threading.CancellationToken,System.Int32)">
+            <summary>
+            Reads and decodes a message from the socket.
+            </summary>
+            <param name="context">Thread-safe WebSocket pack.</param>
+            <param name="token">Cancellation token.</param>
+            <param name="limit">Optional message length limit, applied if positive value provided.</param>
+            <returns>Task returning decoded message with the identifier.</returns>
+        </member>
+        <member name="M:Woof.WebSocket.WoofSubProtocol.WoofCodec.EncodeMessageAsync``1(Woof.WebSocket.WebSocketContext,System.Threading.CancellationToken,``0,System.Guid)">
+            <summary>
+            Encodes the message and sends it to the WebSocket context.
+            </summary>
+            <typeparam name="TMessage">Message type.</typeparam>
+            <param name="context">WebSocket context.</param>
+            <param name="token">Cancellation token.</param>
+            <param name="message">Message to send.</param>
+            <param name="id">Optional message identifier, if not set - new unique identifier will be used.</param>
+            <returns>Task completed when the message is sent.</returns>
+        </member>
+        <member name="M:Woof.WebSocket.WoofSubProtocol.WoofCodec.Sign(System.ArraySegment{System.Byte},System.Byte[])">
+            <summary>
+            Signs a serialized message payload with a type of HMAC algorithm.
+            </summary>
+            <param name="message">Binary message payload.</param>
+            <param name="key">Message signing key.</param>
+            <returns>Message signature (20 bytes, 160 bits).</returns>
+        </member>
+        <member name="M:Woof.WebSocket.WoofSubProtocol.WoofCodec.GetHash(System.Byte[])">
+            <summary>
+            Gets a hash of a key.
+            </summary>
+            <param name="apiKey"></param>
+            <returns>32 bytes (128 bits).</returns>
+        </member>
+        <member name="M:Woof.WebSocket.WoofSubProtocol.WoofCodec.GetKey">
+            <summary>
+            Gets a new key.
+            </summary>
+            <returns>64 bytes (128 bits).</returns>
+        </member>
+        <member name="M:Woof.WebSocket.WoofSubProtocol.WoofCodec.GetKey(System.String)">
+            <summary>
+            Gets a key from string.
+            </summary>
+            <param name="keyString">Key string.</param>
+            <returns>Key bytes.</returns>
+        </member>
+        <member name="M:Woof.WebSocket.WoofSubProtocol.WoofCodec.GetKeyString(System.Byte[])">
+            <summary>
+            Gets a key string from key bytes.
+            </summary>
+            <param name="key">Key bytes.</param>
+            <returns>Key string.</returns>
+        </member>
+    </members>
+</doc>

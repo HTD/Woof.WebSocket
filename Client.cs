@@ -10,16 +10,31 @@ namespace Woof.WebSocket {
     #region WOOF Client
 
     /// <summary>
-    /// WebSocket client base to provide simple WebSocket API over <see cref="WebSocket.Codec"/>.
+    /// WebSocket client base providing a simple WebSocket API over the <see cref="WebSocket.WoofSubProtocol.WoofCodec"/>.
     /// </summary>
-    public abstract class Client : Client<int, Guid, WoofCodec> { }
+    public abstract class Client : Client<int, Guid, WoofCodec> {
+
+        /// <summary>
+        /// Occurs when a message is received by the client.
+        /// </summary>
+        public new event EventHandler<MessageReceivedEventArgs> MessageReceived;
+
+        /// <summary>
+        /// Handles <see cref="MessageReceived"/> event.
+        /// </summary>
+        /// <param name="decodeResult">Message decoding result.</param>
+        /// <param name="context">WebSocket context.</param>
+        protected override void OnMessageReceived(DecodeResult<int, Guid> decodeResult, WebSocketContext context)
+            => MessageReceived?.Invoke(this, new MessageReceivedEventArgs(decodeResult, context));
+
+    }
 
     #endregion
 
     #region Generic Client
 
     /// <summary>
-    /// WebSocket client base to provide simple WebSocket transport and handshake over any given subprotocol.
+    /// WebSocket client base providing simple WebSocket transport and handshake over any given subprotocol.
     /// </summary>
     public abstract class Client<TTypeIndex, TMessageId, TCodec> : WebSocketTransport<TTypeIndex, TMessageId, TCodec>, IDisposable where TCodec : SubProtocolCodec<TTypeIndex, TMessageId>, new() {
 
@@ -32,13 +47,13 @@ namespace Woof.WebSocket {
         public async Task StartAsync() {
             if (CTS != null || Context != null) throw new InvalidOperationException("Client already started");
             State = ServiceState.Starting;
-            StateChanged(State);
+            OnStateChanged(State);
             CTS = new CancellationTokenSource();
             var clientWebSocket = new ClientWebSocket();
             Context = new WebSocketContext(clientWebSocket);
             clientWebSocket.Options.AddSubProtocol(Codec.SubProtocol);
             await clientWebSocket.ConnectAsync(EndPointUri, CTS.Token);
-            await StartReceiveAsync(Context, CTS.Token, CloseReceived);
+            await StartReceiveAsync(Context, CTS.Token, OnCloseReceivedAsync);
         }
 
         /// <summary>
@@ -49,7 +64,7 @@ namespace Woof.WebSocket {
             if (State == ServiceState.Stopping || State == ServiceState.Stopped) return;
             if (State == ServiceState.Starting) throw new InvalidOperationException("Cannot shutdown during startup");
             State = ServiceState.Stopping;
-            StateChanged(State);
+            OnStateChanged(State);
             try {
                 CTS.CancelAfter(TimeSpan.FromSeconds(2));
                 await Context.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, null, CTS.Token);
@@ -61,7 +76,7 @@ namespace Woof.WebSocket {
                 CTS?.Dispose();
                 CTS = null;
                 State = ServiceState.Stopped;
-                StateChanged(State);
+                OnStateChanged(State);
             }
         }
 
@@ -81,7 +96,6 @@ namespace Woof.WebSocket {
         /// <typeparam name="TRequest">Request message type.</typeparam>
         /// <typeparam name="TResponse">Response message type.</typeparam>
         /// <param name="request">Request message.</param>
-        /// <param name="context">Target context.</param>
         /// <returns>Task returning the response message.</returns>
         public async Task<TResponse> SendAndReceiveAsync<TRequest, TResponse>(TRequest request)
             => await SendAndReceiveAsync<TRequest, TResponse>(request, Context);
@@ -101,7 +115,7 @@ namespace Woof.WebSocket {
         /// </summary>
         /// <param name="context">WebSocket context.</param>
         /// <returns>Task completed when the client is closed.</returns>
-        private async Task CloseReceived(WebSocketContext context) => await StopAsync();
+        private async Task OnCloseReceivedAsync(WebSocketContext context) => await StopAsync();
 
         #endregion
 

@@ -8,8 +8,14 @@ namespace Woof.WebSocket {
     /// <summary>
     /// A collection used for matching response messages to the request messages.
     /// </summary>
-    public class RequestIncompleteCollection : RequestIncompleteCollection<Guid, int> {
+    internal class RequestIncompleteCollection : RequestIncompleteCollection<Guid, int> {
+        
+        /// <summary>
+        /// Creates a new instance for codec.
+        /// </summary>
+        /// <param name="codec">Codec instance.</param>
         public RequestIncompleteCollection(SubProtocolCodec<Guid, int> codec) : base(codec) { }
+    
     }
 
     #endregion

@@ -11,56 +11,53 @@ namespace Woof.WebSocket.Test.Server {
             EndPointUri = Api.Properties.EndPointUri;
             Codec.LoadMessageTypes();
             AuthenticationProvider = new TestAuthenticationProvider();
+            MessageReceived += TestServer_MessageReceived;
         }
 
-        protected override void StateChanged(ServiceState state)
-            => Console.WriteLine($"SERVER STATE CHANGED: {state}");
-
-        protected override async Task MessageReceivedAsync(DecodeResult<int, Guid> decodeResult, WebSocketContext context, Guid guid) {
-            if (decodeResult.IsUnauthorized) {
-                await SendMessageAsync(new AccessDeniedResponse(), context, guid);
+        private async void TestServer_MessageReceived(object sender, MessageReceivedEventArgs<int, Guid> e) {
+            if (e.DecodeResult.IsUnauthorized) {
+                await SendMessageAsync(new AccessDeniedResponse(), e.Context, e.DecodeResult.Id);
                 return;
             }
-            switch (decodeResult.Message) {
+            switch (e.Message) {
                 case HelloRequest helloRequest:
-                    await SendMessageAsync(new HelloResponse { MessageText = $"Hello, {helloRequest.Name}!" }, context, guid);
+                    await SendMessageAsync(new HelloResponse { MessageText = $"Hello, {helloRequest.Name}!" }, e.Context, e.DecodeResult.Id);
                     break;
                 case SubscribeRequest subscribeRequest:
                     switch (subscribeRequest.Name) {
                         case "time":
                             await AsyncLoop.FromIterationAsync(async () => {
-                                await SendMessageAsync(new TimeNotification { Time = DateTime.Now }, context);
+                                await SendMessageAsync(new TimeNotification { Time = DateTime.Now }, e.Context);
                                 await Task.Delay(subscribeRequest.Period);
-                            }, CancellationToken, ReceiveException, () => context.IsOpen);
+                            }, CancellationToken, OnReceiveException, () => e.Context.IsOpen);
                             break;
                     }
                     break;
                 case SignInRequest signInRequest:
-                    var session = SessionProvider.GetSession<ApiClientSession>(context);
+                    var session = SessionProvider.GetSession<ApiClientSession>(e.Context);
                     session.Key = await AuthenticationProvider.GetKeyAsync(signInRequest.ApiKey);
-                    await SendMessageAsync(new SignInResponse { IsSuccess = decodeResult.IsSignatureValid && session.Key != null }, context, guid);
+                    await SendMessageAsync(new SignInResponse { IsSuccess = e.DecodeResult.IsSignatureValid && session.Key != null }, e.Context, e.DecodeResult.Id);
                     break;
                 case SignOutRequest signOutRequest:
-                    SessionProvider.CloseSession(context);
-                    await SendMessageAsync(new SignOutResponse { ServerTime = DateTime.Now }, context, guid);
+                    SessionProvider.CloseSession(e.Context);
+                    await SendMessageAsync(new SignOutResponse { ServerTime = DateTime.Now }, e.Context, e.DecodeResult.Id);
                     break;
                 case AuthenticatedRequest authenticatedRequest:
                     await SendMessageAsync(new AuthenticatedResponse {
-                        Answer = decodeResult.IsSignatureValid
+                        Answer = e.DecodeResult.IsSignatureValid
                         ? $"{authenticatedRequest.Question} 42?"
                         : "GET LOST!"
-                    }, context, guid);
+                    }, e.Context, e.DecodeResult.Id);
                     break;
                 case EmptyRequest emptyRequest:
-                    await SendMessageAsync(new EmptyResponse(), context, guid);
+                    await SendMessageAsync(new EmptyResponse(), e.Context, e.DecodeResult.Id);
                     break;
             }
         }
 
-        protected override void ReceiveException(Exception exception) {
-            while (exception.InnerException != null) exception = exception.InnerException;
-            Console.WriteLine($"SERVER EXCEPTION: {exception.Message}");
-        }
+
+        
+        
 
     }
 

@@ -43,7 +43,6 @@ namespace Woof.WebSocket {
         /// <param name="context">WebSocket context.</param>
         /// <param name="token">Cancellation token.</param>
         /// <param name="limit">Optional message length limit, applied if positive value provided.</param>
-        /// <param name="key">Optional message signing key.</param>
         /// <returns>Task returning decoded message with the identifier.</returns>
         public abstract Task<DecodeResult<TTypeIndex, TMessageId>> DecodeMessageAsync(WebSocketContext context, CancellationToken token, int limit = -1);
 
@@ -55,7 +54,6 @@ namespace Woof.WebSocket {
         /// <param name="token">Cancellation token.</param>
         /// <param name="message">Message to send.</param>
         /// <param name="id">Optional message identifier, if not set - new unique identifier will be used.</param>
-        /// <param name="key">Optional message signing key.</param>
         /// <returns>Task completed when the message is sent.</returns>
         public abstract Task EncodeMessageAsync<TMessage>(WebSocketContext context, CancellationToken token, TMessage message, TMessageId id = default);
 

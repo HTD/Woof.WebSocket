@@ -10,28 +10,62 @@ namespace Woof.WebSocket {
     /// </summary>
     /// <typeparam name="TMessageId">Message identifier type.</typeparam>
     /// <typeparam name="TTypeIndex">Message type index type.</typeparam>
+    /// <typeparam name="TCodec">Message codec implementing the subprotocol.</typeparam>
     public abstract class WebSocketTransport<TTypeIndex, TMessageId, TCodec> : IStateProvider  where TCodec : SubProtocolCodec<TTypeIndex, TMessageId>, new() {
 
         #region Public API
 
+        #region Events
+
+        /// <summary>
+        /// Occurs when a message is received by the socket.
+        /// </summary>
+        public event EventHandler<MessageReceivedEventArgs<TTypeIndex, TMessageId>> MessageReceived;
+        
+        /// <summary>
+        /// Occurs when an exception is thrown during receive process.
+        /// </summary>
+        public event EventHandler<ExceptionEventArgs> ReceiveException;
+
+        /// <summary>
+        /// Occurs when the state of the client or server service is changed.
+        /// </summary>
+        public event EventHandler<StateChangedEventArgs> StateChanged;
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// Gets the module providing session management for both client and server.
+        /// </summary>
+        public SessionProvider SessionProvider { get; } = new SessionProvider();
+
+        /// <summary>
+        /// A module providing API key authentication asynchronous method.<br/>
+        /// <see cref="IAuthenticationProvider"/> implementation is necessary for built-in API key authentication support.<br/>
+        /// <strong>This is not set by default.</strong>
+        /// </summary>
+        public IAuthenticationProvider AuthenticationProvider { get; set; }
+
+        #endregion
+
+        /// <summary>
+        /// Initializes the transport with the codec and request completion instances.
+        /// </summary>
         public WebSocketTransport() {
             Codec = new TCodec { State = this };
             RequestsIncomplete = new RequestIncompleteCollection<TTypeIndex, TMessageId>(Codec);
         }
 
+        #endregion
+
+        #region Protected state
+
         /// <summary>
         /// Gets the cancellation token used for the client or server instance.
         /// </summary>
-        public CancellationToken CancellationToken => CTS?.Token ?? CancellationToken.None;
-
-        /// <summary>
-        /// Gets the current client or server state.
-        /// </summary>
-        public ServiceState State { get; protected set; } = ServiceState.Stopped;
-
-        #endregion
-
-        #region Implement
+        protected CancellationToken CancellationToken => CTS?.Token ?? CancellationToken.None;
 
         /// <summary>
         /// Gets the subprotocol codec.
@@ -39,18 +73,23 @@ namespace Woof.WebSocket {
         protected TCodec Codec { get; }
 
         /// <summary>
-        /// A collection of incomplete requests, that require the other party's response.
+        /// Gets the WebSocket end point URI.
+        /// </summary>
+        protected Uri EndPointUri { get; set; }
+
+        /// <summary>
+        /// A collection of incomplete requests requiring the other party's response.
         /// </summary>
         protected RequestIncompleteCollection<TTypeIndex, TMessageId> RequestsIncomplete { get; }
+
+        /// <summary>
+        /// Gets the current client or server state.
+        /// </summary>
+        protected ServiceState State { get; set; } = ServiceState.Stopped;
 
         #endregion
 
         #region Override
-
-        /// <summary>
-        /// Gets the WebSocket end point URI.
-        /// </summary>
-        protected Uri EndPointUri { get; set; }
 
         /// <summary>
         /// Gets the limit of the message size that can be received (default 1MB).<br/>
@@ -58,69 +97,58 @@ namespace Woof.WebSocket {
         /// </summary>
         public virtual int MaxReceiveMessageSize => 0x00100000; // 1MB
 
-        public SessionProvider SessionProvider { get; } = new SessionProvider();
-
-        public IAuthenticationProvider AuthenticationProvider { get; set; }
-
         /// <summary>
-        /// Implementing class must provide the asynchronous code to handle the message received event.
-        /// </summary>
-        /// <param name="decodeResult">Message decoding result.</param>
-        /// <param name="context">WebSocket context, that can be used to send the response to.</param>
-        /// <param name="id">Message identifier received.</param>
-        /// <returns>Task completed when the message handling is done.</returns>
-        protected virtual Task MessageReceivedAsync(DecodeResult<TTypeIndex, TMessageId> decodeResult, WebSocketContext context, TMessageId id) => Task.CompletedTask;
-
-        /// <summary>
-        /// Implementing class must provide the asynchronous code to handle the message received event.
+        /// Invokes <see cref="MessageReceived"/> event.
         /// </summary>
         /// <param name="decodeResult">Message decoding result.</param>
         /// <param name="context">WebSocket context, that can be used to send the response to.</param>
         /// <returns>Task completed when the message handling is done.</returns>
-        protected virtual void MessageReceived(DecodeResult<TTypeIndex, TMessageId> decodeResult, WebSocketContext context, TMessageId id) { }
+        protected virtual void OnMessageReceived(DecodeResult<TTypeIndex, TMessageId> decodeResult, WebSocketContext context)
+            => MessageReceived?.Invoke(this, new MessageReceivedEventArgs<TTypeIndex, TMessageId>(decodeResult, context));
 
         /// <summary>
-        /// Implementing class may provide its own exception handler for the exceptions that occur during message receiving.
+        /// Invokes <see cref="ReceiveException"/> event.
         /// </summary>
         /// <param name="exception">Exception passed.</param>
-        protected virtual void ReceiveException(Exception exception) { }
+        protected virtual void OnReceiveException(Exception exception)
+            => ReceiveException?.Invoke(this, new ExceptionEventArgs(exception));
 
         /// <summary>
-        /// Implementing class may provide some code to react to the client or server state changed.
+        /// Invokes <see cref="StateChanged"/> event.
         /// </summary>
-        protected virtual void StateChanged(ServiceState state) { }
+        protected virtual void OnStateChanged(ServiceState state)
+            => StateChanged?.Invoke(this, new StateChangedEventArgs(state));
 
         #endregion
 
         #region Transport tools
 
         /// <summary>
-        /// Reads binary messages from the socket, deserializes them and calls <see cref="MessageReceived(object, WebSocketContext, Guid)"/>.
+        /// Reads binary messages from the socket, deserializes them and triggers <see cref="MessageReceived"/> event.
         /// </summary>
         /// <param name="context">WebSocket context.</param>
         /// <returns>Receive loop task.</returns>
         private async Task Receive(WebSocketContext context) {
             if (State != ServiceState.Started) {
                 State = ServiceState.Started;
-                StateChanged(State);
+                _ = Task.Run(() => OnStateChanged(State));
             }
             while (!CancellationToken.IsCancellationRequested && context.IsOpen) {
                 try {
-                    var decodeResult = await Codec.DecodeMessageAsync(context, CancellationToken, MaxReceiveMessageSize); // FIXME: Access denied exceptions!
+                    var decodeResult = await Codec.DecodeMessageAsync(context, CancellationToken, MaxReceiveMessageSize);
                     if (decodeResult.IsCloseFrame) break;
                     if (RequestsIncomplete.TryRemoveResponseSynchronizer(decodeResult.Id, out var responseSynchronizer)) {
                         responseSynchronizer.Message = decodeResult.Message;
                         responseSynchronizer.Semaphore.Release();
                     }
                     else {
-                        MessageReceived(decodeResult, context, decodeResult.Id);
-                        await MessageReceivedAsync(decodeResult, context, decodeResult.Id);
+                        _ = Task.Run(() => OnMessageReceived(decodeResult, context));
                     }
                 }
                 catch (Exception exception) {
                     if (exception is TaskCanceledException) throw;
                     if (exception is WebSocketException wsx && wsx.InnerException is TaskCanceledException) throw;
-                    ReceiveException(exception);
+                    _ = Task.Run(() => OnReceiveException(exception));
                 }
             }
         }
@@ -136,7 +164,7 @@ namespace Woof.WebSocket {
             if (cleanUpAsync is null)
                 await Task.Factory.StartNew(
                     async() => await Receive(context),
-                    CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default
+                    token, TaskCreationOptions.LongRunning, TaskScheduler.Default
                 );
             else
                 await Task.Factory.StartNew(
@@ -144,7 +172,7 @@ namespace Woof.WebSocket {
                         await Receive(context);
                         await cleanUpAsync(context);
                     },
-                    CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default
+                    token, TaskCreationOptions.LongRunning, TaskScheduler.Default
                 );
         }
 
@@ -167,6 +195,8 @@ namespace Woof.WebSocket {
         /// <param name="request">Request message.</param>
         /// <param name="context">Target context.</param>
         /// <returns>Task returning the response message.</returns>
+        /// <exception cref="UnexpectedMessageException">Thrown when a defined, but unexpected type message is received instead of expected one.</exception>
+        /// <exception cref="TaskCanceledException">Thrown when the client or server operation is cancelled.</exception>
         protected async Task<TResponse> SendAndReceiveAsync<TRequest, TResponse>(TRequest request, WebSocketContext context) {
             var (id, synchronizer) = RequestsIncomplete.NewResponseSynchronizer;
             try {
