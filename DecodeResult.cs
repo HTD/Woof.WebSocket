@@ -6,9 +6,7 @@ namespace Woof.WebSocket {
     /// <summary>
     /// Defines message decoding result.
     /// </summary>
-    /// <typeparam name="TTypeIndex">Message type index type.</typeparam>
-    /// <typeparam name="TMessageId">Message identifier type.</typeparam>
-    public class DecodeResult<TTypeIndex, TMessageId> {
+    public class DecodeResult {
 
         /// <summary>
         /// Gets the decoded message.
@@ -18,12 +16,12 @@ namespace Woof.WebSocket {
         /// <summary>
         /// Gets the message type identifier.
         /// </summary>
-        public TTypeIndex TypeId { get; }
+        public int TypeId { get; }
 
         /// <summary>
         /// Gets the message identifier.
         /// </summary>
-        public TMessageId MessageId { get; }
+        public Guid MessageId { get; }
 
         /// <summary>
         /// Gets a value indicating whether the CLOSE frame was received instead of a message.
@@ -69,7 +67,7 @@ namespace Woof.WebSocket {
         /// <param name="message">Message content.</param>
         /// <param name="isValidSignatureRequired">True, if a valid signature of the message is required.</param>
         /// <param name="isSignatureValid">True, if the message signature is verified.</param>
-        public DecodeResult(TTypeIndex typeId, TMessageId id, object message, bool isValidSignatureRequired = false, bool isSignatureValid = false) {
+        public DecodeResult(int typeId, Guid id, object message, bool isValidSignatureRequired = false, bool isSignatureValid = false) {
             TypeId = typeId;
             MessageId = id;
             Message = message;
@@ -97,7 +95,7 @@ namespace Woof.WebSocket {
         /// <param name="typeId">Message type identifier.</param>
         /// <param name="id">Message identifier.</param>
         /// <param name="exception">Exception while receiving the message.</param>
-        public DecodeResult(TTypeIndex typeId, TMessageId id, Exception exception) {
+        public DecodeResult(int typeId, Guid id, Exception exception) {
             TypeId = typeId;
             MessageId = id;
             Exception = exception;

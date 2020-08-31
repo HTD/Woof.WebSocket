@@ -2,13 +2,14 @@
 using System.Threading.Tasks;
 
 using Woof.WebSocket.Test.Api;
+using Woof.WebSocket.WoofSubProtocol;
 
 namespace Woof.WebSocket.Test.Server {
 
     /// <summary>
     /// Test server designed as a part of package documentation.
     /// </summary>
-    class TestServer : Woof.WebSocket.Server {
+    class TestServer : Server<WoofCodec> {
 
         /// <summary>
         /// Initializes the test server instance.
@@ -25,7 +26,7 @@ namespace Woof.WebSocket.Test.Server {
         /// </summary>
         /// <param name="decodeResult">Message receive result.</param>
         /// <param name="context">WebSocket (client) context.</param>
-        protected override async void OnMessageReceived(DecodeResult<int, Guid> decodeResult, WebSocketContext context) {
+        protected override async void OnMessageReceived(DecodeResult decodeResult, WebSocketContext context) {
             if (decodeResult.IsUnauthorized) {
                 await SendMessageAsync(new AccessDeniedResponse(), context, decodeResult.MessageId);
                 return;

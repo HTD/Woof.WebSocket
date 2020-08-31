@@ -10,36 +10,10 @@ using Woof.WebSocket.WoofSubProtocol;
 
 namespace Woof.WebSocket {
 
-    #region WOOF Server
-
-    /// <summary>
-    /// WebSocket server base providing a simple WebSocket API over the <see cref="WebSocket.WoofSubProtocol.WoofCodec"/>.<br/>
-    /// </summary>
-    public abstract class Server : Server<int, Guid, WoofCodec> {
-
-        /// <summary>
-        /// Occurs when a message is received by the server.
-        /// </summary>
-        public new event EventHandler<MessageReceivedEventArgs> MessageReceived;
-
-        /// <summary>
-        /// Handles <see cref="MessageReceived"/> event.
-        /// </summary>
-        /// <param name="decodeResult">Message decoding result.</param>
-        /// <param name="context">WebSocket context.</param>
-        protected override void OnMessageReceived(DecodeResult<int, Guid> decodeResult, WebSocketContext context)
-            => MessageReceived?.Invoke(this, new MessageReceivedEventArgs(decodeResult, context));
-
-    }
-
-    #endregion
-
-    #region Generic Server
-
     /// <summary>
     /// WebSocket server base providing simple WebSocket transport and handshake over any given subprotocol.
     /// </summary>
-    public abstract class Server<TTypeIndex, TMessageId, TCodec> : WebSocketTransport<TTypeIndex, TMessageId, TCodec>, IDisposable where TCodec : SubProtocolCodec<TTypeIndex, TMessageId>, new() {
+    public abstract class Server<TCodec> : WebSocketTransport<TCodec>, IDisposable where TCodec : SubProtocolCodec, new() {
 
         #region Public API
 
@@ -119,7 +93,7 @@ namespace Woof.WebSocket {
         /// <param name="context">Target context.</param>
         /// <param name="id">Optional message identifier, if not set - new unique identifier will be used.</param>
         /// <returns>Task completed when the sending is done.</returns>
-        public new async Task SendMessageAsync<T>(T message, WebSocketContext context, TMessageId id = default)
+        public new async Task SendMessageAsync<T>(T message, WebSocketContext context, Guid id = default)
             => await base.SendMessageAsync(message, context, id);
 
         /// <summary>
@@ -214,7 +188,5 @@ namespace Woof.WebSocket {
         #endregion
 
     }
-
-    #endregion
 
 }

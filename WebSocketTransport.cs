@@ -8,10 +8,8 @@ namespace Woof.WebSocket {
     /// <summary>
     /// WebSocket transport base class to be used by both clients and servers.
     /// </summary>
-    /// <typeparam name="TMessageId">Message identifier type.</typeparam>
-    /// <typeparam name="TTypeIndex">Message type index type.</typeparam>
     /// <typeparam name="TCodec">Message codec implementing the subprotocol.</typeparam>
-    public abstract class WebSocketTransport<TTypeIndex, TMessageId, TCodec> : IStateProvider  where TCodec : SubProtocolCodec<TTypeIndex, TMessageId>, new() {
+    public abstract class WebSocketTransport<TCodec> : IStateProvider  where TCodec : SubProtocolCodec, new() {
 
         #region Public API
 
@@ -20,7 +18,7 @@ namespace Woof.WebSocket {
         /// <summary>
         /// Occurs when a message is received by the socket.
         /// </summary>
-        public event EventHandler<MessageReceivedEventArgs<TTypeIndex, TMessageId>> MessageReceived;
+        public event EventHandler<MessageReceivedEventArgs> MessageReceived;
         
         /// <summary>
         /// Occurs when an exception is thrown during receive process.
@@ -60,7 +58,7 @@ namespace Woof.WebSocket {
         /// </summary>
         public WebSocketTransport() {
             Codec = new TCodec { State = this };
-            RequestsIncomplete = new RequestIncompleteCollection<TTypeIndex, TMessageId>(Codec);
+            RequestsIncomplete = new RequestIncompleteCollection(Codec);
         }
 
         #endregion
@@ -85,7 +83,7 @@ namespace Woof.WebSocket {
         /// <summary>
         /// A collection of incomplete requests requiring the other party's response.
         /// </summary>
-        protected RequestIncompleteCollection<TTypeIndex, TMessageId> RequestsIncomplete { get; }
+        protected RequestIncompleteCollection RequestsIncomplete { get; }
 
         #endregion
 
@@ -103,8 +101,8 @@ namespace Woof.WebSocket {
         /// <param name="decodeResult">Message decoding result.</param>
         /// <param name="context">WebSocket context, that can be used to send the response to.</param>
         /// <returns>Task completed when the message handling is done.</returns>
-        protected virtual void OnMessageReceived(DecodeResult<TTypeIndex, TMessageId> decodeResult, WebSocketContext context)
-            => MessageReceived?.Invoke(this, new MessageReceivedEventArgs<TTypeIndex, TMessageId>(decodeResult, context));
+        protected virtual void OnMessageReceived(DecodeResult decodeResult, WebSocketContext context)
+            => MessageReceived?.Invoke(this, new MessageReceivedEventArgs(decodeResult, context));
 
         /// <summary>
         /// Invokes <see cref="ReceiveException"/> event.
@@ -184,7 +182,7 @@ namespace Woof.WebSocket {
         /// <param name="context">Target context.</param>
         /// <param name="id">Optional message identifier, if not set - new unique identifier will be used.</param>
         /// <returns>Task completed when the sending is done.</returns>
-        protected async Task SendMessageAsync<TMessage>(TMessage message, WebSocketContext context, TMessageId id = default)
+        protected async Task SendMessageAsync<TMessage>(TMessage message, WebSocketContext context, Guid id = default)
             => await Codec.EncodeMessageAsync(context, CancellationToken, message, id);
 
         /// <summary>

@@ -2,13 +2,14 @@
 using System.Threading.Tasks;
 
 using Woof.WebSocket.Test.Api;
+using Woof.WebSocket.WoofSubProtocol;
 
 namespace Woof.WebSocket.Test.Client {
 
     /// <summary>
     /// Test client designed as a part of package documentation.
     /// </summary>
-    public class TestClient : Woof.WebSocket.Client {
+    public class TestClient : Client<WoofCodec> {
 
         /// <summary>
         /// Initializes the test server instance.

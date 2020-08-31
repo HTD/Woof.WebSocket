@@ -8,9 +8,7 @@ namespace Woof.WebSocket {
     /// An interface of subprotocol codecs for WebSocket servers and clients.<br/>
     /// Allows implementing virtually any subprotocol for a WebSocket API.
     /// </summary>
-    /// <typeparam name="TTypeIndex">Message type index type.</typeparam>
-    /// <typeparam name="TMessageId">Message identifier type.</typeparam>
-    public abstract class SubProtocolCodec<TTypeIndex, TMessageId> {
+    public abstract class SubProtocolCodec {
 
         /// <summary>
         /// Gets the buffer serializer implementation.
@@ -30,12 +28,12 @@ namespace Woof.WebSocket {
         /// <summary>
         /// Gets the new unique message identifier.
         /// </summary>
-        public abstract TMessageId NewId { get; }
+        public abstract Guid NewId { get; }
 
         /// <summary>
         /// Gets the message types available in the API.
         /// </summary>
-        protected MessageTypeDictionary<TTypeIndex> MessageTypes { get; } = new MessageTypeDictionary<TTypeIndex>();
+        protected MessageTypeDictionary MessageTypes { get; } = new MessageTypeDictionary();
 
         /// <summary>
         /// Loads message types.
@@ -49,7 +47,7 @@ namespace Woof.WebSocket {
         /// <param name="token">Cancellation token.</param>
         /// <param name="limit">Optional message length limit, applied if positive value provided.</param>
         /// <returns>Task returning decoded message with the identifier.</returns>
-        public abstract Task<DecodeResult<TTypeIndex, TMessageId>> DecodeMessageAsync(WebSocketContext context, CancellationToken token, int limit = -1);
+        public abstract Task<DecodeResult> DecodeMessageAsync(WebSocketContext context, CancellationToken token, int limit = -1);
 
         /// <summary>
         /// Encodes the message and sends it to the WebSocket context.
@@ -60,7 +58,7 @@ namespace Woof.WebSocket {
         /// <param name="message">Message to send.</param>
         /// <param name="id">Optional message identifier, if not set - new unique identifier will be used.</param>
         /// <returns>Task completed when the message is sent.</returns>
-        public abstract Task EncodeMessageAsync<TMessage>(WebSocketContext context, CancellationToken token, TMessage message, TMessageId id = default);
+        public abstract Task EncodeMessageAsync<TMessage>(WebSocketContext context, CancellationToken token, TMessage message, Guid id = default);
 
         /// <summary>
         /// Signs a serialized message payload with a type of HMAC algorithm.

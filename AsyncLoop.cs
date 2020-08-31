@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 namespace Woof.WebSocket {
 
     /// <summary>
-    /// Allow starting an asynchronous loop in a new task.
+    /// Asynchronous loop runner.
     /// </summary>
     public static class AsyncLoop {
 

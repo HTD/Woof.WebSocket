@@ -9,9 +9,6 @@ using System.Threading.Tasks;
 
 using ProtoBuf;
 
-using CodecBase = Woof.WebSocket.SubProtocolCodec<int, System.Guid>;
-using DecodeResult = Woof.WebSocket.DecodeResult<int, System.Guid>;
-
 namespace Woof.WebSocket.WoofSubProtocol {
 
     // TODO: Implement stream message type / stream mode with opening another WebSocket for it.
@@ -19,7 +16,7 @@ namespace Woof.WebSocket.WoofSubProtocol {
     /// <summary>
     /// Implements WOOF subprotocol codec.
     /// </summary>
-    public sealed class WoofCodec : CodecBase {
+    public sealed class WoofCodec : SubProtocolCodec {
 
         #region Public API
 
@@ -194,23 +191,6 @@ namespace Woof.WebSocket.WoofSubProtocol {
         public override string GetKeyString(byte[] key) => Convert.ToBase64String(key);
 
         #endregion
-
-        //#region Helpers
-
-        //private ArraySegment<byte> GetBuffer(int size) => new ArraySegment<byte>(new byte[size]);
-
-        //private ArraySegment<byte> Serialize<TMessage>(TMessage message, int limit = default) {
-        //    using var stream = limit >= 0 ? new MemoryStream(limit) : new MemoryStream();
-        //    Serializer.Serialize(stream, message);
-        //    if (stream.TryGetBuffer(out var buffer)) return buffer;
-        //    else throw new InvalidOperationException();
-        //}
-
-        //private object Deserialize(Type type, ArraySegment<byte> buffer) => ProtoBuf.Serializer.NonGeneric.Deserialize(type, (ReadOnlySpan<byte>)buffer);
-
-        //private T Deserialize<T>(ArraySegment<byte> buffer) => Serializer.Deserialize<T>((ReadOnlySpan<byte>)buffer);
-
-        //#endregion
 
         #region Exception messages
 
