@@ -877,6 +877,11 @@
             <strong>This is not set by default.</strong>
             </summary>
         </member>
+        <member name="P:Woof.WebSocket.WebSocketTransport`3.State">
+            <summary>
+            Gets the current client or server state.
+            </summary>
+        </member>
         <member name="M:Woof.WebSocket.WebSocketTransport`3.#ctor">
             <summary>
             Initializes the transport with the codec and request completion instances.
@@ -900,11 +905,6 @@
         <member name="P:Woof.WebSocket.WebSocketTransport`3.RequestsIncomplete">
             <summary>
             A collection of incomplete requests requiring the other party's response.
-            </summary>
-        </member>
-        <member name="P:Woof.WebSocket.WebSocketTransport`3.State">
-            <summary>
-            Gets the current client or server state.
             </summary>
         </member>
         <member name="P:Woof.WebSocket.WebSocketTransport`3.MaxReceiveMessageSize">

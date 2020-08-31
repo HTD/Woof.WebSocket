@@ -11,6 +11,8 @@ WOOF subprotocol is based on Google Protocol Buffers to serialize data and fixed
     <PackageReleaseNotes>The first version passing the tests.</PackageReleaseNotes>
     <Authors>Adam Łyskawa</Authors>
     <Company>CodeDog Ltd</Company>
+    <PackageLicenseExpression></PackageLicenseExpression>
+    <PackageLicenseFile>License.txt</PackageLicenseFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -30,6 +32,10 @@ WOOF subprotocol is based on Google Protocol Buffers to serialize data and fixed
     <None Remove="Woof.WebSocket.Test.Client\**" />
     <None Remove="Woof.WebSocket.Test.Server\**" />
     <None Remove="Woof.WebSocket.Test\**" />
+    <None Include="License.txt">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
