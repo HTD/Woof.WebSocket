@@ -22,7 +22,7 @@ namespace Woof.WebSocket {
         /// </summary>
         /// <param name="context">WebSocket from the connected client.</param>
         public void CloseSession(WebSocketContext context) {
-            var sessionId = IdGenerator.GetId(context, out var _);
+            var sessionId = IdGenerator.GetId(context, out _);
             Sessions.Remove(sessionId);
         }
 
@@ -40,7 +40,7 @@ namespace Woof.WebSocket {
         /// <returns>Session object.</returns>
         public TSession GetSession<TSession>(WebSocketContext context = null) where TSession : ISession, new() {
             if (IdGenerator is null) return (TSession)(Session = new TSession()); // single session, started from client scenario.
-            var sessionId = IdGenerator.GetId(context, out var _);
+            var sessionId = IdGenerator.GetId(context, out _);
             if (Sessions is null) Sessions = new SessionCollection();
             if (!Sessions.ContainsKey(sessionId)) {
                 var newSession = new TSession();
@@ -58,7 +58,7 @@ namespace Woof.WebSocket {
         public byte[] GetKey(WebSocketContext context) {
             if (IdGenerator is null && Session is null) return null;
             if (IdGenerator is null) return Session.Key;
-            var sessionId = IdGenerator.GetId(context, out var _);
+            var sessionId = IdGenerator.GetId(context, out _);
             if (Sessions.ContainsKey(sessionId)) return Sessions[sessionId].Key;
             return null;
         }
