@@ -36,9 +36,9 @@ namespace Woof.WebSocket {
         protected MessageTypeDictionary MessageTypes { get; } = new MessageTypeDictionary();
 
         /// <summary>
-        /// Loads message types.
+        /// Loads message types if applicable.
         /// </summary>
-        public abstract void LoadMessageTypes();
+        public virtual void LoadMessageTypes() { }
 
         /// <summary>
         /// Reads and decodes a message from the WebSocket context.
