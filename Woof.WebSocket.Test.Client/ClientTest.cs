@@ -28,7 +28,6 @@ namespace Woof.WebSocket.Test.Client {
             await client.StopAsync();
         }
 
-
         /// <summary>
         /// Handles MessageReceived event.
         /// </summary>

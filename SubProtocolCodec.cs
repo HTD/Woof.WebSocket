@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,7 +19,7 @@ namespace Woof.WebSocket {
         /// <summary>
         /// Gets or sets the state used to access <see cref="SessionProvider"/> and <see cref="IAuthenticationProvider"/>.
         /// </summary>
-        internal IStateProvider State { get; set; }
+        public IStateProvider State { get; internal set; }
 
         /// <summary>
         /// Gets the subprotocol name.
@@ -65,35 +66,43 @@ namespace Woof.WebSocket {
         /// </summary>
         /// <param name="message">Binary message payload.</param>
         /// <param name="key">Message signing key.</param>
-        /// <returns>Message signature.</returns>
-        public abstract byte[] Sign(ArraySegment<byte> message, byte[] key);
+        /// <returns>Message signature (20 bytes, 160 bits).</returns>
+        public virtual byte[] Sign(ArraySegment<byte> message, byte[] key) {
+            using var hmac = new HMACSHA256(key); return hmac.ComputeHash(message.Array, message.Offset, message.Count);
+        }
 
         /// <summary>
         /// Gets a hash of a key.
         /// </summary>
         /// <param name="apiKey"></param>
-        /// <returns>Hash bytes.</returns>
-        public abstract byte[] GetHash(byte[] apiKey);
+        /// <returns>32 bytes (128 bits).</returns>
+        public virtual byte[] GetHash(byte[] apiKey) {
+            using var sha = SHA256.Create();
+            return sha.ComputeHash(apiKey);
+        }
 
         /// <summary>
         /// Gets a new key.
         /// </summary>
-        /// <returns>Key bytes.</returns>
-        public abstract byte[] GetKey();
+        /// <returns>64 bytes (128 bits).</returns>
+        public virtual byte[] GetKey() {
+            using var hmac = HMACSHA256.Create();
+            return hmac.Key;
+        }
 
         /// <summary>
         /// Gets a key from string.
         /// </summary>
         /// <param name="keyString">Key string.</param>
         /// <returns>Key bytes.</returns>
-        public abstract byte[] GetKey(string keyString);
+        public virtual byte[] GetKey(string keyString) => Convert.FromBase64String(keyString);
 
         /// <summary>
         /// Gets a key string from key bytes.
         /// </summary>
         /// <param name="key">Key bytes.</param>
         /// <returns>Key string.</returns>
-        public abstract string GetKeyString(byte[] key);
+        public virtual string GetKeyString(byte[] key) => Convert.ToBase64String(key);
 
     }
 

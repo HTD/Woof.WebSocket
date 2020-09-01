@@ -73,6 +73,16 @@
             WebSocket context used to exchange binary data with the server.
             </summary>
         </member>
+        <member name="T:Woof.WebSocket.ClientSession">
+            <summary>
+            Basic client session data, provides secret key for the client.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.ClientSession.Key">
+            <summary>
+            Gets or sets a message signing key for the session.
+            </summary>
+        </member>
         <member name="T:Woof.WebSocket.DecodeResult">
             <summary>
             Defines message decoding result.
@@ -81,11 +91,6 @@
         <member name="P:Woof.WebSocket.DecodeResult.Message">
             <summary>
             Gets the decoded message.
-            </summary>
-        </member>
-        <member name="P:Woof.WebSocket.DecodeResult.TypeId">
-            <summary>
-            Gets the message type identifier.
             </summary>
         </member>
         <member name="P:Woof.WebSocket.DecodeResult.MessageId">
@@ -129,11 +134,10 @@
             Gets the WebSocket close status description if the CLOSE frame was received.
             </summary>
         </member>
-        <member name="M:Woof.WebSocket.DecodeResult.#ctor(System.Int32,System.Guid,System.Object,System.Boolean,System.Boolean)">
+        <member name="M:Woof.WebSocket.DecodeResult.#ctor(System.Guid,System.Object,System.Boolean,System.Boolean)">
             <summary>
             Creates "full" decode result with the received and decoded message.
             </summary>
-            <param name="typeId">Message type identifier.</param>
             <param name="id">Message identifier.</param>
             <param name="message">Message content.</param>
             <param name="isValidSignatureRequired">True, if a valid signature of the message is required.</param>
@@ -145,11 +149,10 @@
             </summary>
             <param name="receiveResult">"CLOSE" <see cref="T:System.Net.WebSockets.WebSocketReceiveResult"/></param>
         </member>
-        <member name="M:Woof.WebSocket.DecodeResult.#ctor(System.Int32,System.Guid,System.Exception)">
+        <member name="M:Woof.WebSocket.DecodeResult.#ctor(System.Guid,System.Exception)">
             <summary>
             Creates error decode result when the message metadata is read.
             </summary>
-            <param name="typeId">Message type identifier.</param>
             <param name="id">Message identifier.</param>
             <param name="exception">Exception while receiving the message.</param>
         </member>
@@ -158,6 +161,85 @@
             Creates error decode result when the message metadata could not be read.
             </summary>
             <param name="exception"></param>
+        </member>
+        <member name="T:Woof.WebSocket.DynamicBuffer">
+            <summary>
+            Dynamic heap memory buffer to read messages with unknown length.<br/>
+            The buffer allocates more memory if it is needed.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.DynamicBuffer.Array">
+            <summary>
+            Gets the internal array buffer.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.DynamicBuffer.Offset">
+            <summary>
+            Gets the slice offset.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.DynamicBuffer.Count">
+            <summary>
+            Gets the slice byte count.
+            </summary>
+        </member>
+        <member name="F:Woof.WebSocket.DynamicBuffer.Limit">
+            <summary>
+            Contains hard limit for the buffer capacity.<br/>
+            If unset (default) there is no limit.
+            </summary>
+        </member>
+        <member name="M:Woof.WebSocket.DynamicBuffer.#ctor(System.Int32,System.Int32)">
+            <summary>
+            Creates an empty buffer of specified initial size.
+            </summary>
+            <param name="size">Initial size.</param>
+            <param name="limit">Optional capacity limit.</param>
+        </member>
+        <member name="M:Woof.WebSocket.DynamicBuffer.#ctor(System.Byte[],System.Int32)">
+            <summary>
+            Creates a buffer from an array.
+            </summary>
+            <param name="array">Array.</param>
+            <param name="limit">Optional capacity limit.</param>
+        </member>
+        <member name="M:Woof.WebSocket.DynamicBuffer.#ctor(System.Byte[],System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Create a buffer from a slice of an array.
+            </summary>
+            <param name="array">Array.</param>
+            <param name="offset">Offset.</param>
+            <param name="count">Count.</param>
+            <param name="limit">Optional capacity limit.</param>
+        </member>
+        <member name="M:Woof.WebSocket.DynamicBuffer.#ctor(System.ArraySegment{System.Byte},System.Int32)">
+            <summary>
+            Creates a buffer from existing <see cref="T:System.ArraySegment`1"/> buffer.
+            </summary>
+            <param name="arraySegment">Buffer.</param>
+            <param name="limit">Optional capacity limit.</param>
+        </member>
+        <member name="M:Woof.WebSocket.DynamicBuffer.Advance(System.Int32,System.Boolean)">
+            <summary>
+            Advances the buffer offset, allocates more memory for the next read operation if full capacity is used and the read operation is not the last one.
+            <br/>
+            When the last operation fills the exact buffer capacity without setting <paramref name="isLast"/>,
+            <see cref="M:Woof.WebSocket.DynamicBuffer.Advance(System.Int32,System.Boolean)"/> without parameters must be called to fix buffer count.
+            </summary>
+            <param name="readLength">The length of the data that was actually written to the buffer.</param>
+            <param name="isLast">True, if the read operation was the last one. Prevents allocation if exact buffer length was read last.</param>
+        </member>
+        <member name="M:Woof.WebSocket.DynamicBuffer.op_Implicit(Woof.WebSocket.DynamicBuffer)~System.ArraySegment{System.Byte}">
+            <summary>
+            Converts to <see cref="T:System.ArraySegment`1"/>.
+            </summary>
+            <param name="buffer">Buffer.</param>
+        </member>
+        <member name="M:Woof.WebSocket.DynamicBuffer.op_Implicit(System.ArraySegment{System.Byte})~Woof.WebSocket.DynamicBuffer">
+            <summary>
+            Converts from <see cref="T:System.ArraySegment`1"/>.
+            </summary>
+            <param name="arraySegment"><see cref="T:System.ArraySegment`1"/>.</param>
         </member>
         <member name="T:Woof.WebSocket.ExceptionEventArgs">
             <summary>
@@ -228,6 +310,16 @@
             Gets or sets a message signing key for the session.
             </summary>
         </member>
+        <member name="T:Woof.WebSocket.ISignInRequest">
+            <summary>
+            Implement in sign in request to make the request automatically match the message signing key with the API key.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.ISignInRequest.ApiKey">
+            <summary>
+            Gets the API key sent in the request.
+            </summary>
+        </member>
         <member name="T:Woof.WebSocket.IStateProvider">
             <summary>
             Provides <see cref="P:Woof.WebSocket.IStateProvider.SessionProvider"/> and <see cref="P:Woof.WebSocket.IStateProvider.AuthenticationProvider"/> services.
@@ -241,6 +333,57 @@
         <member name="P:Woof.WebSocket.IStateProvider.AuthenticationProvider">
             <summary>
             Gets or sets a module that allows ansynchronous authentication of the API key.
+            </summary>
+        </member>
+        <member name="T:Woof.WebSocket.MessageAttribute">
+            <summary>
+            Assigns a type identifier to a class.
+            </summary>
+        </member>
+        <member name="M:Woof.WebSocket.MessageAttribute.#ctor(System.Int32)">
+            <summary>
+            Creates new message type attribute.
+            </summary>
+            <param name="id">Message type identifier.</param>
+        </member>
+        <member name="P:Woof.WebSocket.MessageAttribute.MessageTypeId">
+            <summary>
+            Gets the message type identifier.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.MessageAttribute.IsSigned">
+            <summary>
+            Gets the value indicating whether the message is required to be signed.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.MessageAttribute.IsSignInRequest">
+            <summary>
+            Gets the value indicating whether the message is a special sign-in message.
+            </summary>
+        </member>
+        <member name="T:Woof.WebSocket.MessageMetadata">
+            <summary>
+            Messge metadata header part.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.MessageMetadata.TypeId">
+            <summary>
+            Message type identifier.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.MessageMetadata.Id">
+            <summary>
+            Message identifier.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.MessageMetadata.PayloadLength">
+            <summary>
+            Message payload length.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.MessageMetadata.Signature">
+            <summary>
+            Optional message signature.
             </summary>
         </member>
         <member name="T:Woof.WebSocket.MessageReceivedEventArgs">
@@ -663,20 +806,20 @@
             </summary>
             <param name="message">Binary message payload.</param>
             <param name="key">Message signing key.</param>
-            <returns>Message signature.</returns>
+            <returns>Message signature (20 bytes, 160 bits).</returns>
         </member>
         <member name="M:Woof.WebSocket.SubProtocolCodec.GetHash(System.Byte[])">
             <summary>
             Gets a hash of a key.
             </summary>
             <param name="apiKey"></param>
-            <returns>Hash bytes.</returns>
+            <returns>32 bytes (128 bits).</returns>
         </member>
         <member name="M:Woof.WebSocket.SubProtocolCodec.GetKey">
             <summary>
             Gets a new key.
             </summary>
-            <returns>Key bytes.</returns>
+            <returns>64 bytes (128 bits).</returns>
         </member>
         <member name="M:Woof.WebSocket.SubProtocolCodec.GetKey(System.String)">
             <summary>
@@ -970,98 +1113,37 @@
             A cancellation token source used to cancel all the client and server tasks.
             </summary>
         </member>
-        <member name="T:Woof.WebSocket.WoofSubProtocol.ISignInRequest">
-            <summary>
-            Implement in sign in request to make the request automatically match the message signing key with the API key.
-            </summary>
-        </member>
-        <member name="P:Woof.WebSocket.WoofSubProtocol.ISignInRequest.ApiKey">
-            <summary>
-            Gets the API key sent in the request.
-            </summary>
-        </member>
-        <member name="T:Woof.WebSocket.WoofSubProtocol.MessageAttribute">
-            <summary>
-            Assigns a type identifier to a class.
-            </summary>
-        </member>
-        <member name="M:Woof.WebSocket.WoofSubProtocol.MessageAttribute.#ctor(System.Int32)">
-            <summary>
-            Creates new message type attribute.
-            </summary>
-            <param name="id">Message type identifier.</param>
-        </member>
-        <member name="P:Woof.WebSocket.WoofSubProtocol.MessageAttribute.MessageTypeId">
-            <summary>
-            Gets the message type identifier.
-            </summary>
-        </member>
-        <member name="P:Woof.WebSocket.WoofSubProtocol.MessageAttribute.IsSigned">
-            <summary>
-            Gets the value indicating whether the message is required to be signed.
-            </summary>
-        </member>
-        <member name="P:Woof.WebSocket.WoofSubProtocol.MessageAttribute.IsSignInRequest">
-            <summary>
-            Gets the value indicating whether the message is a special sign-in message.
-            </summary>
-        </member>
-        <member name="T:Woof.WebSocket.WoofSubProtocol.MessageMetadata">
-            <summary>
-            Messge metadata header part.
-            </summary>
-        </member>
-        <member name="P:Woof.WebSocket.WoofSubProtocol.MessageMetadata.TypeId">
-            <summary>
-            Message type identifier.
-            </summary>
-        </member>
-        <member name="P:Woof.WebSocket.WoofSubProtocol.MessageMetadata.Id">
-            <summary>
-            Message identifier.
-            </summary>
-        </member>
-        <member name="P:Woof.WebSocket.WoofSubProtocol.MessageMetadata.PayloadLength">
-            <summary>
-            Message payload length.
-            </summary>
-        </member>
-        <member name="P:Woof.WebSocket.WoofSubProtocol.MessageMetadata.Signature">
-            <summary>
-            Optional message signature.
-            </summary>
-        </member>
-        <member name="T:Woof.WebSocket.WoofSubProtocol.WoofCodec">
+        <member name="T:Woof.WebSocket.WoofCodec">
             <summary>
             Implements WOOF subprotocol codec.
             </summary>
         </member>
-        <member name="F:Woof.WebSocket.WoofSubProtocol.WoofCodec.Name">
+        <member name="F:Woof.WebSocket.WoofCodec.Name">
             <summary>
             Common subprotocol name.
             </summary>
         </member>
-        <member name="P:Woof.WebSocket.WoofSubProtocol.WoofCodec.Serializer">
+        <member name="P:Woof.WebSocket.WoofCodec.Serializer">
             <summary>
             Gets the Protocol Buffers serializer.
             </summary>
         </member>
-        <member name="P:Woof.WebSocket.WoofSubProtocol.WoofCodec.SubProtocol">
+        <member name="P:Woof.WebSocket.WoofCodec.SubProtocol">
             <summary>
             Gets the subprotocol name.
             </summary>
         </member>
-        <member name="P:Woof.WebSocket.WoofSubProtocol.WoofCodec.NewId">
+        <member name="P:Woof.WebSocket.WoofCodec.NewId">
             <summary>
             Gets the new unique message id.
             </summary>
         </member>
-        <member name="M:Woof.WebSocket.WoofSubProtocol.WoofCodec.LoadMessageTypes">
+        <member name="M:Woof.WebSocket.WoofCodec.LoadMessageTypes">
             <summary>
             Loads message types from the current application domain assemblies.
             </summary>
         </member>
-        <member name="M:Woof.WebSocket.WoofSubProtocol.WoofCodec.DecodeMessageAsync(Woof.WebSocket.WebSocketContext,System.Threading.CancellationToken,System.Int32)">
+        <member name="M:Woof.WebSocket.WoofCodec.DecodeMessageAsync(Woof.WebSocket.WebSocketContext,System.Threading.CancellationToken,System.Int32)">
             <summary>
             Reads and decodes a message from the socket.
             </summary>
@@ -1070,7 +1152,7 @@
             <param name="limit">Optional message length limit, applied if positive value provided.</param>
             <returns>Task returning decoded message with the identifier.</returns>
         </member>
-        <member name="M:Woof.WebSocket.WoofSubProtocol.WoofCodec.EncodeMessageAsync``1(Woof.WebSocket.WebSocketContext,System.Threading.CancellationToken,``0,System.Guid)">
+        <member name="M:Woof.WebSocket.WoofCodec.EncodeMessageAsync``1(Woof.WebSocket.WebSocketContext,System.Threading.CancellationToken,``0,System.Guid)">
             <summary>
             Encodes the message and sends it to the WebSocket context.
             </summary>
@@ -1080,41 +1162,6 @@
             <param name="message">Message to send.</param>
             <param name="id">Optional message identifier, if not set - new unique identifier will be used.</param>
             <returns>Task completed when the message is sent.</returns>
-        </member>
-        <member name="M:Woof.WebSocket.WoofSubProtocol.WoofCodec.Sign(System.ArraySegment{System.Byte},System.Byte[])">
-            <summary>
-            Signs a serialized message payload with a type of HMAC algorithm.
-            </summary>
-            <param name="message">Binary message payload.</param>
-            <param name="key">Message signing key.</param>
-            <returns>Message signature (20 bytes, 160 bits).</returns>
-        </member>
-        <member name="M:Woof.WebSocket.WoofSubProtocol.WoofCodec.GetHash(System.Byte[])">
-            <summary>
-            Gets a hash of a key.
-            </summary>
-            <param name="apiKey"></param>
-            <returns>32 bytes (128 bits).</returns>
-        </member>
-        <member name="M:Woof.WebSocket.WoofSubProtocol.WoofCodec.GetKey">
-            <summary>
-            Gets a new key.
-            </summary>
-            <returns>64 bytes (128 bits).</returns>
-        </member>
-        <member name="M:Woof.WebSocket.WoofSubProtocol.WoofCodec.GetKey(System.String)">
-            <summary>
-            Gets a key from string.
-            </summary>
-            <param name="keyString">Key string.</param>
-            <returns>Key bytes.</returns>
-        </member>
-        <member name="M:Woof.WebSocket.WoofSubProtocol.WoofCodec.GetKeyString(System.Byte[])">
-            <summary>
-            Gets a key string from key bytes.
-            </summary>
-            <param name="key">Key bytes.</param>
-            <returns>Key string.</returns>
         </member>
     </members>
 </doc>

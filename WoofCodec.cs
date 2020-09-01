@@ -78,16 +78,16 @@ namespace Woof.WebSocket {
                 return new DecodeResult(new InvalidOperationException(EHeaderIncomplete));
             var metaData = Serializer.Deserialize<MessageMetadata>(metaDataBuffer);
             if (!MessageTypes.ContainsKey(metaData.TypeId))
-                return new DecodeResult(metaData.TypeId, metaData.Id, new InvalidOperationException(EUnknownType));
+                return new DecodeResult(metaData.Id, new InvalidOperationException(EUnknownType));
             if (limit >= 0 && metaData.PayloadLength > limit)
-                return new DecodeResult(metaData.TypeId, metaData.Id, new InvalidOperationException(String.Format(ELengthExceeded, nameof(limit))));
+                return new DecodeResult(metaData.Id, new InvalidOperationException(String.Format(ELengthExceeded, nameof(limit))));
             var typeContext = MessageTypes[metaData.TypeId];
             if (receiveResult.EndOfMessage)
-                return new DecodeResult(metaData.TypeId, metaData.Id, Activator.CreateInstance(typeContext.MessageType));
+                return new DecodeResult(metaData.Id, Activator.CreateInstance(typeContext.MessageType));
             var messageBuffer = new ArraySegment<byte>(new byte[metaData.PayloadLength]);
             receiveResult = await context.ReceiveAsync(messageBuffer, token);
             if (receiveResult.Count < metaData.PayloadLength || !receiveResult.EndOfMessage)
-                return new DecodeResult(metaData.TypeId, metaData.Id, new InvalidOperationException(EMessageIncomplete));
+                return new DecodeResult(metaData.Id, new InvalidOperationException(EMessageIncomplete));
             var message = Serializer.Deserialize(MessageTypes[metaData.TypeId].MessageType, messageBuffer);
             var isSignatureValid = false;
             var isSignInRequest = typeContext.IsSignInRequest || message is ISignInRequest;
@@ -101,7 +101,7 @@ namespace Woof.WebSocket {
                     isSignatureValid = metaData.Signature.SequenceEqual(expected);
                 }
             }
-            return new DecodeResult(metaData.TypeId, metaData.Id, message, !isSignInRequest && typeContext.IsSigned, isSignatureValid);
+            return new DecodeResult(metaData.Id, message, !isSignInRequest && typeContext.IsSigned, isSignatureValid);
         }
 
         /// <summary>
@@ -144,48 +144,6 @@ namespace Woof.WebSocket {
             await context.SendAsync(messageParts, WebSocketMessageType.Binary, token);
         }
 
-        /// <summary>
-        /// Signs a serialized message payload with a type of HMAC algorithm.
-        /// </summary>
-        /// <param name="message">Binary message payload.</param>
-        /// <param name="key">Message signing key.</param>
-        /// <returns>Message signature (20 bytes, 160 bits).</returns>
-        public override byte[] Sign(ArraySegment<byte> message, byte[] key) {
-            using var hmac = new HMACSHA256(key); return hmac.ComputeHash(message.Array, message.Offset, message.Count);
-        }
-
-        /// <summary>
-        /// Gets a hash of a key.
-        /// </summary>
-        /// <param name="apiKey"></param>
-        /// <returns>32 bytes (128 bits).</returns>
-        public override byte[] GetHash(byte[] apiKey) {
-            using var sha = SHA256.Create();
-            return sha.ComputeHash(apiKey);
-        }
-
-        /// <summary>
-        /// Gets a new key.
-        /// </summary>
-        /// <returns>64 bytes (128 bits).</returns>
-        public override byte[] GetKey() {
-            using var hmac = HMACSHA256.Create();
-            return hmac.Key;
-        }
-
-        /// <summary>
-        /// Gets a key from string.
-        /// </summary>
-        /// <param name="keyString">Key string.</param>
-        /// <returns>Key bytes.</returns>
-        public override byte[] GetKey(string keyString) => Convert.FromBase64String(keyString);
-
-        /// <summary>
-        /// Gets a key string from key bytes.
-        /// </summary>
-        /// <param name="key">Key bytes.</param>
-        /// <returns>Key string.</returns>
-        public override string GetKeyString(byte[] key) => Convert.ToBase64String(key);
 
         #endregion
 

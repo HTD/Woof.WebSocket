@@ -14,11 +14,6 @@ namespace Woof.WebSocket {
         public object Message { get; }
 
         /// <summary>
-        /// Gets the message type identifier.
-        /// </summary>
-        public int TypeId { get; }
-
-        /// <summary>
         /// Gets the message identifier.
         /// </summary>
         public Guid MessageId { get; }
@@ -62,13 +57,11 @@ namespace Woof.WebSocket {
         /// <summary>
         /// Creates "full" decode result with the received and decoded message.
         /// </summary>
-        /// <param name="typeId">Message type identifier.</param>
         /// <param name="id">Message identifier.</param>
         /// <param name="message">Message content.</param>
         /// <param name="isValidSignatureRequired">True, if a valid signature of the message is required.</param>
         /// <param name="isSignatureValid">True, if the message signature is verified.</param>
-        public DecodeResult(int typeId, Guid id, object message, bool isValidSignatureRequired = false, bool isSignatureValid = false) {
-            TypeId = typeId;
+        public DecodeResult(Guid id, object message, bool isValidSignatureRequired = false, bool isSignatureValid = false) {
             MessageId = id;
             Message = message;
             IsSignatureValid = isSignatureValid;
@@ -92,11 +85,9 @@ namespace Woof.WebSocket {
         /// <summary>
         /// Creates error decode result when the message metadata is read.
         /// </summary>
-        /// <param name="typeId">Message type identifier.</param>
         /// <param name="id">Message identifier.</param>
         /// <param name="exception">Exception while receiving the message.</param>
-        public DecodeResult(int typeId, Guid id, Exception exception) {
-            TypeId = typeId;
+        public DecodeResult(Guid id, Exception exception) {
             MessageId = id;
             Exception = exception;
         }
