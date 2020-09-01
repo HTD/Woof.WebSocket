@@ -29,12 +29,23 @@ namespace Woof.WebSocket {
         /// </summary>
         public ResponseSynchronizer() => Semaphore = new SemaphoreSlim(0, 1);
 
+        private bool IsDisposed;
+
         /// <summary>
         /// Disposes the underlying semaphore, releases it if applicable first, not to block awaiting sending thread.
         /// </summary>
         public void Dispose() {
-            if (Semaphore.CurrentCount < 1) Semaphore.Release();
-            Semaphore.Dispose();
+            if (IsDisposed) return;
+            try {
+                if (Semaphore.CurrentCount < 1) Semaphore.Release();
+                Semaphore.Dispose();
+            }
+            catch (ObjectDisposedException) {
+                // we really don't care if the semaphore is already disposed by external code.
+            }
+            finally { // however:
+                IsDisposed = true;
+            }
         }
 
     }

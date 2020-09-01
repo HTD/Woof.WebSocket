@@ -98,6 +98,11 @@
             Gets the message identifier.
             </summary>
         </member>
+        <member name="P:Woof.WebSocket.DecodeResult.TypeContext">
+            <summary>
+            Gets the message type context.
+            </summary>
+        </member>
         <member name="P:Woof.WebSocket.DecodeResult.IsCloseFrame">
             <summary>
             Gets a value indicating whether the CLOSE frame was received instead of a message.
@@ -134,12 +139,13 @@
             Gets the WebSocket close status description if the CLOSE frame was received.
             </summary>
         </member>
-        <member name="M:Woof.WebSocket.DecodeResult.#ctor(System.Guid,System.Object,System.Boolean,System.Boolean)">
+        <member name="M:Woof.WebSocket.DecodeResult.#ctor(Woof.WebSocket.MessageTypeContext,System.Object,System.Guid,System.Boolean,System.Boolean)">
             <summary>
             Creates "full" decode result with the received and decoded message.
             </summary>
-            <param name="id">Message identifier.</param>
+            <param name="typeContext">Message type context.</param>
             <param name="message">Message content.</param>
+            <param name="id">Message identifier.</param>
             <param name="isValidSignatureRequired">True, if a valid signature of the message is required.</param>
             <param name="isSignatureValid">True, if the message signature is verified.</param>
         </member>
@@ -149,12 +155,20 @@
             </summary>
             <param name="receiveResult">"CLOSE" <see cref="T:System.Net.WebSockets.WebSocketReceiveResult"/></param>
         </member>
-        <member name="M:Woof.WebSocket.DecodeResult.#ctor(System.Guid,System.Exception)">
+        <member name="M:Woof.WebSocket.DecodeResult.#ctor(System.Exception,Woof.WebSocket.MessageTypeContext,System.Guid)">
             <summary>
-            Creates error decode result when the message metadata is read.
+            Creates error decode result when the full message metadata is read.
             </summary>
-            <param name="id">Message identifier.</param>
             <param name="exception">Exception while receiving the message.</param>
+            <param name="typeContext">Message type context.</param>
+            <param name="id">Message identifier.</param>
+        </member>
+        <member name="M:Woof.WebSocket.DecodeResult.#ctor(System.Exception,System.Guid)">
+            <summary>
+            Creates error decode result when the message metadata is read, but the type information is not available.
+            </summary>
+            <param name="exception">Exception while receiving the message.</param>
+            <param name="id">Message identifier.</param>
         </member>
         <member name="M:Woof.WebSocket.DecodeResult.#ctor(System.Exception)">
             <summary>
@@ -361,6 +375,11 @@
             Gets the value indicating whether the message is a special sign-in message.
             </summary>
         </member>
+        <member name="P:Woof.WebSocket.MessageAttribute.IsError">
+            <summary>
+            Gets a value indicating whether the message is an error message.
+            </summary>
+        </member>
         <member name="T:Woof.WebSocket.MessageMetadata">
             <summary>
             Messge metadata header part.
@@ -433,13 +452,19 @@
             Gets a value indicating whether the message is a sign in request.
             </summary>
         </member>
-        <member name="M:Woof.WebSocket.MessageTypeContext.#ctor(System.Type,System.Boolean,System.Boolean)">
+        <member name="P:Woof.WebSocket.MessageTypeContext.IsError">
+            <summary>
+            Gets a value indicating whether the message is an error message.
+            </summary>
+        </member>
+        <member name="M:Woof.WebSocket.MessageTypeContext.#ctor(System.Type,System.Boolean,System.Boolean,System.Boolean)">
             <summary>
             Creates a new message type context.
             </summary>
             <param name="messageType">Message type.</param>
             <param name="isSigned">True if message should be signed.</param>
             <param name="isSignInRequest">True if the message is a sign in request.</param>
+            <param name="isError">True is the message is an error message.</param>
         </member>
         <member name="T:Woof.WebSocket.MessageTypeDictionary">
             <summary>

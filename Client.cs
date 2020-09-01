@@ -23,7 +23,8 @@ namespace Woof.WebSocket {
             CTS = new CancellationTokenSource();
             var clientWebSocket = new ClientWebSocket();
             Context = new WebSocketContext(clientWebSocket);
-            clientWebSocket.Options.AddSubProtocol(Codec.SubProtocol);
+            if (Codec.SubProtocol != null)
+                clientWebSocket.Options.AddSubProtocol(Codec.SubProtocol);
             try {
                 await clientWebSocket.ConnectAsync(EndPointUri, CTS.Token);
                 await StartReceiveAsync(Context, CTS.Token, OnCloseReceivedAsync);

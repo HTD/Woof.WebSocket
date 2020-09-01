@@ -29,6 +29,11 @@ namespace Woof.WebSocket {
         /// </summary>
         public bool IsSignInRequest { get; set; }
 
+        /// <summary>
+        /// Gets a value indicating whether the message is an error message.
+        /// </summary>
+        public bool IsError { get; set; }
+
     }
 
 }

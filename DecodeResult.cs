@@ -19,6 +19,11 @@ namespace Woof.WebSocket {
         public Guid MessageId { get; }
 
         /// <summary>
+        /// Gets the message type context.
+        /// </summary>
+        public MessageTypeContext TypeContext { get; }
+
+        /// <summary>
         /// Gets a value indicating whether the CLOSE frame was received instead of a message.
         /// </summary>
         public bool IsCloseFrame { get; }
@@ -57,11 +62,13 @@ namespace Woof.WebSocket {
         /// <summary>
         /// Creates "full" decode result with the received and decoded message.
         /// </summary>
-        /// <param name="id">Message identifier.</param>
+        /// <param name="typeContext">Message type context.</param>
         /// <param name="message">Message content.</param>
+        /// <param name="id">Message identifier.</param>
         /// <param name="isValidSignatureRequired">True, if a valid signature of the message is required.</param>
         /// <param name="isSignatureValid">True, if the message signature is verified.</param>
-        public DecodeResult(Guid id, object message, bool isValidSignatureRequired = false, bool isSignatureValid = false) {
+        public DecodeResult(MessageTypeContext typeContext, object message, Guid id, bool isValidSignatureRequired = false, bool isSignatureValid = false) {
+            TypeContext = typeContext;
             MessageId = id;
             Message = message;
             IsSignatureValid = isSignatureValid;
@@ -83,11 +90,23 @@ namespace Woof.WebSocket {
         }
 
         /// <summary>
-        /// Creates error decode result when the message metadata is read.
+        /// Creates error decode result when the full message metadata is read.
         /// </summary>
-        /// <param name="id">Message identifier.</param>
         /// <param name="exception">Exception while receiving the message.</param>
-        public DecodeResult(Guid id, Exception exception) {
+        /// <param name="typeContext">Message type context.</param>
+        /// <param name="id">Message identifier.</param>
+        public DecodeResult(Exception exception, MessageTypeContext typeContext, Guid id) {
+            TypeContext = typeContext;
+            MessageId = id;
+            Exception = exception;
+        }
+
+        /// <summary>
+        /// Creates error decode result when the message metadata is read, but the type information is not available.
+        /// </summary>
+        /// <param name="exception">Exception while receiving the message.</param>
+        /// <param name="id">Message identifier.</param>
+        public DecodeResult(Exception exception, Guid id) {
             MessageId = id;
             Exception = exception;
         }

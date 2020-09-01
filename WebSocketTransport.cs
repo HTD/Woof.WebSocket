@@ -139,6 +139,9 @@ namespace Woof.WebSocket {
                         responseSynchronizer.Message = decodeResult.Message;
                         responseSynchronizer.Semaphore.Release();
                     }
+                    else if (decodeResult.TypeContext?.IsError == true && decodeResult.MessageId == default) {
+                        RequestsIncomplete.Dispose(); // emergency release of incomplete requests on unmatched server error messages
+                    }
                     else {
                         _ = Task.Run(() => OnMessageReceived(decodeResult, context));
                     }

@@ -47,7 +47,7 @@ namespace Woof.WebSocket {
                 .SelectMany(a => a.GetTypes())
                 .Where(t => t.GetCustomAttribute<MessageAttribute>() != null)
                 .Select(t => new { Type = t, Meta = t.GetCustomAttribute<MessageAttribute>() })) {
-                MessageTypes.Add(t.Meta.MessageTypeId, new MessageTypeContext(t.Type, t.Meta.IsSigned, t.Meta.IsSignInRequest));
+                MessageTypes.Add(t.Meta.MessageTypeId, new MessageTypeContext(t.Type, t.Meta.IsSigned, t.Meta.IsSignInRequest, t.Meta.IsError));
             }
         }
 
@@ -78,16 +78,16 @@ namespace Woof.WebSocket {
                 return new DecodeResult(new InvalidOperationException(EHeaderIncomplete));
             var metaData = Serializer.Deserialize<MessageMetadata>(metaDataBuffer);
             if (!MessageTypes.ContainsKey(metaData.TypeId))
-                return new DecodeResult(metaData.Id, new InvalidOperationException(EUnknownType));
+                return new DecodeResult(new InvalidOperationException(EUnknownType), metaData.Id);
             if (limit >= 0 && metaData.PayloadLength > limit)
-                return new DecodeResult(metaData.Id, new InvalidOperationException(String.Format(ELengthExceeded, nameof(limit))));
+                return new DecodeResult(new InvalidOperationException(String.Format(ELengthExceeded, nameof(limit))), metaData.Id);
             var typeContext = MessageTypes[metaData.TypeId];
             if (receiveResult.EndOfMessage)
-                return new DecodeResult(metaData.Id, Activator.CreateInstance(typeContext.MessageType));
+                return new DecodeResult(typeContext, Activator.CreateInstance(typeContext.MessageType), metaData.Id);
             var messageBuffer = new ArraySegment<byte>(new byte[metaData.PayloadLength]);
             receiveResult = await context.ReceiveAsync(messageBuffer, token);
             if (receiveResult.Count < metaData.PayloadLength || !receiveResult.EndOfMessage)
-                return new DecodeResult(metaData.Id, new InvalidOperationException(EMessageIncomplete));
+                return new DecodeResult(new InvalidOperationException(EMessageIncomplete), metaData.Id);
             var message = Serializer.Deserialize(MessageTypes[metaData.TypeId].MessageType, messageBuffer);
             var isSignatureValid = false;
             var isSignInRequest = typeContext.IsSignInRequest || message is ISignInRequest;
@@ -101,7 +101,7 @@ namespace Woof.WebSocket {
                     isSignatureValid = metaData.Signature.SequenceEqual(expected);
                 }
             }
-            return new DecodeResult(metaData.Id, message, !isSignInRequest && typeContext.IsSigned, isSignatureValid);
+            return new DecodeResult(typeContext, message, metaData.Id, !isSignInRequest && typeContext.IsSigned, isSignatureValid);
         }
 
         /// <summary>
