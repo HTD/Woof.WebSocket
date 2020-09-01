@@ -634,7 +634,7 @@
         </member>
         <member name="M:Woof.WebSocket.SubProtocolCodec.LoadMessageTypes">
             <summary>
-            Loads message types.
+            Loads message types if applicable.
             </summary>
         </member>
         <member name="M:Woof.WebSocket.SubProtocolCodec.DecodeMessageAsync(Woof.WebSocket.WebSocketContext,System.Threading.CancellationToken,System.Int32)">

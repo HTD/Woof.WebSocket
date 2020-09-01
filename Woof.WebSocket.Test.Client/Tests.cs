@@ -109,7 +109,7 @@ namespace Woof.WebSocket.Test.Client {
         bool IsArgMatched(string[] args, string item, out int parameter, int fallback = default) {
             parameter = fallback;
             if (!IsArgMatched(args, item, out string candidate)) return false;
-            if (!Regex.IsMatch(candidate, @"^\d")) return true;
+            if (candidate is null || !Regex.IsMatch(candidate, @"^\d")) return true;
             return int.TryParse(candidate, NumberStyles.Integer, CultureInfo.InvariantCulture, out parameter);
         }
 
