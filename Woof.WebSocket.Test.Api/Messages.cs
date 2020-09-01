@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Data;
-using System.Diagnostics.Contracts;
 
 using ProtoBuf;
-
-using Woof.WebSocket.WoofSubProtocol;
 
 /// <summary>
 /// Test API definition designed as a part of package documentation.

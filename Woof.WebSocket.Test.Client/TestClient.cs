@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 
 using Woof.WebSocket.Test.Api;
-using Woof.WebSocket.WoofSubProtocol;
 
 namespace Woof.WebSocket.Test.Client {
 

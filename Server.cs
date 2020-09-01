@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Woof.WebSocket.WoofSubProtocol;
 
 namespace Woof.WebSocket {
 

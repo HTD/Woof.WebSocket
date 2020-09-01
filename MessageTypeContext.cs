@@ -1,7 +1,5 @@
 ﻿using System;
 
-using Woof.WebSocket.WoofSubProtocol;
-
 namespace Woof.WebSocket {
 
     /// <summary>

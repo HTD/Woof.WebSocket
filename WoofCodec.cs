@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 using System.Net.WebSockets;
 using System.Reflection;
@@ -7,9 +6,7 @@ using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 
-using ProtoBuf;
-
-namespace Woof.WebSocket.WoofSubProtocol {
+namespace Woof.WebSocket {
 
     // TODO: Implement stream message type / stream mode with opening another WebSocket for it.
 

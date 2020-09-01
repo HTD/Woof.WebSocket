@@ -2,7 +2,7 @@
 
 using ProtoBuf;
 
-namespace Woof.WebSocket.WoofSubProtocol {
+namespace Woof.WebSocket {
 
     /// <summary>
     /// Messge metadata header part.

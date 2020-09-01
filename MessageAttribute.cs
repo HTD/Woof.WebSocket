@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Woof.WebSocket.WoofSubProtocol {
+namespace Woof.WebSocket {
 
     /// <summary>
     /// Assigns a type identifier to a class.

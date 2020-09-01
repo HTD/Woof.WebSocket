@@ -1,4 +1,4 @@
-﻿namespace Woof.WebSocket.WoofSubProtocol {
+﻿namespace Woof.WebSocket {
 
     /// <summary>
     /// Implement in sign in request to make the request automatically match the message signing key with the API key.
