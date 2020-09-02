@@ -25,14 +25,17 @@ WOOF subprotocol is based on Google Protocol Buffers to serialize data and fixed
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Tests\**" />
     <Compile Remove="Woof.WebSocket.Test.Api\**" />
     <Compile Remove="Woof.WebSocket.Test.Client\**" />
     <Compile Remove="Woof.WebSocket.Test.Server\**" />
     <Compile Remove="Woof.WebSocket.Test\**" />
+    <EmbeddedResource Remove="Tests\**" />
     <EmbeddedResource Remove="Woof.WebSocket.Test.Api\**" />
     <EmbeddedResource Remove="Woof.WebSocket.Test.Client\**" />
     <EmbeddedResource Remove="Woof.WebSocket.Test.Server\**" />
     <EmbeddedResource Remove="Woof.WebSocket.Test\**" />
+    <None Remove="Tests\**" />
     <None Remove="Woof.WebSocket.Test.Api\**" />
     <None Remove="Woof.WebSocket.Test.Client\**" />
     <None Remove="Woof.WebSocket.Test.Server\**" />
