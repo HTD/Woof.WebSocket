@@ -91,7 +91,10 @@ namespace Woof.WebSocket {
         public void Advance(int readLength = 0, bool isLast = false) {
             lock (Array) {
                 if (readLength < Count || isLast) {
-                    if (readLength == default && Offset == default) return;
+                    if (readLength == default && Offset == default) {
+                        Count = 0;
+                        return;
+                    }
                     Offset += readLength;
                     Count = Offset;
                     Offset = 0;
