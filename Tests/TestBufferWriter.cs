@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.Text;
 
 namespace Tests {
-    
+
     class TestBufferWriter {
 
         public byte[] Data { get; }
@@ -33,6 +30,6 @@ namespace Tests {
         private int Offset;
         private int Count;
 
-
     }
+
 }
