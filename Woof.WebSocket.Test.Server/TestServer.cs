@@ -16,7 +16,7 @@ namespace Woof.WebSocket.Test.Server {
         public TestServer() {
             AuthenticationProvider = new TestAuthenticationProvider();
             EndPointUri = Api.Properties.EndPointUri;
-            Codec.LoadMessageTypes(); // IMPORTANT: IT MUSN'T BE CALLED UNLESS AT LEAST ONE API ASSEMBLY MEMBER WAS NOT TOUCHED!
+            Codec.LoadMessageTypes(); // IMPORTANT: IT MUSTN'T BE CALLED UNLESS AT LEAST ONE API ASSEMBLY MEMBER WAS NOT TOUCHED!
         }
 
         /// <summary>
