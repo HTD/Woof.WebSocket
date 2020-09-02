@@ -134,6 +134,7 @@ namespace Woof.WebSocket {
             while (!CancellationToken.IsCancellationRequested && context.IsOpen) {
                 try {
                     var decodeResult = await Codec.DecodeMessageAsync(context, CancellationToken, MaxReceiveMessageSize);
+                    if (decodeResult is null) continue; // we should ignore empty frames, shouldn't we?
                     if (decodeResult.IsCloseFrame) break;
                     if (RequestsIncomplete.TryRemoveResponseSynchronizer(decodeResult.MessageId, out var responseSynchronizer)) {
                         responseSynchronizer.Message = decodeResult.Message;
