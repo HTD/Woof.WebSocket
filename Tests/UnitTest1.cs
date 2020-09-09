@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Text;
 
 using NUnit.Framework;
 
@@ -19,13 +20,13 @@ namespace Tests {
             var buffers = new ArraySegment<byte>[4];
             for (var i = 0; i < 4; i++) buffers[i] = new ArraySegment<byte>(new byte[3]);
             int bytesRead;
-            bool isMessageEnd;
             for (var i = 0; i < 4; i++) {
-                bytesRead = w1.Write(buffers[i], out isMessageEnd);
+                bytesRead = w1.Write(buffers[i], out var isMessageEnd);
                 if (i < 3) {
                     Assert.AreEqual(3, bytesRead, "Invalid return value");
                     Assert.IsFalse(isMessageEnd, "Invalid message end indication");
-                } else {
+                }
+                else {
                     Assert.AreEqual(1, bytesRead, "Invalid return value");
                     Assert.IsTrue(isMessageEnd, "Invalid message end indication");
                 }
@@ -44,10 +45,9 @@ namespace Tests {
         [Test]
         public void TestDynamicBuffer() {
             int bytesRead;
-            bool isMessageEnd;
             var w = new TestBufferWriter(0);
             var b = new DynamicBuffer(1);
-            bytesRead = w.Write(b, out isMessageEnd);
+            bytesRead = w.Write(b, out var isMessageEnd);
             b.Advance(bytesRead, isMessageEnd);
             Assert.AreEqual(0, bytesRead, "Invalid return value");
             Assert.IsTrue(isMessageEnd, "Invalid message end indication");
@@ -68,6 +68,19 @@ namespace Tests {
             }
         }
     
+        [Test]
+        public void GetKeyTest() {
+            var codec = new WoofCodec();
+            var apiKey = codec.GetKey();
+            var secret = codec.GetKey();
+            var hash = codec.GetHash(apiKey);
+            var b = new StringBuilder();
+            b.AppendLine($"    Key: {codec.GetKeyString(apiKey)}");
+            b.AppendLine($" Secret: {codec.GetKeyString(secret)}");
+            b.AppendLine($"   Hash: {codec.GetKeyString(hash)}");
+            Console.WriteLine(b.ToString());
+        }
+
     }
 
 }

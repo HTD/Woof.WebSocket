@@ -86,7 +86,7 @@ namespace Woof.WebSocket {
         /// </summary>
         /// <returns>64 bytes (128 bits).</returns>
         public virtual byte[] GetKey() {
-            using var hmac = HMACSHA256.Create();
+            using var hmac = HMACSHA256.Create("HMACSHA256");
             return hmac.Key;
         }
 

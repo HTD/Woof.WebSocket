@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Woof.WebSocket.Test.Server"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Woof.WebSocket.Test.Client", "Woof.WebSocket.Test.Client\Woof.WebSocket.Test.Client.csproj", "{C9043C12-58ED-4FE5-8D1A-2E5BB663B6F2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{DF272F07-00B7-49FD-9E5D-007EA94BAA4E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tests", "Tests\Tests.csproj", "{DF272F07-00B7-49FD-9E5D-007EA94BAA4E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
