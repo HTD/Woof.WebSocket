@@ -8,6 +8,11 @@ namespace Woof.WebSocket {
     public class SessionProvider {
 
         /// <summary>
+        /// Gets the sessions collection for the server instance.
+        /// </summary>
+        public SessionCollection Sessions { get; private set; }
+
+        /// <summary>
         /// Initializes session identifier for the current client context.<br/>
         /// Switches <see cref="SessionProvider"/> to SERVER mode / multiple sessions.
         /// </summary>
@@ -43,7 +48,7 @@ namespace Woof.WebSocket {
             var sessionId = IdGenerator.GetId(context, out _);
             if (Sessions is null) Sessions = new SessionCollection();
             if (!Sessions.ContainsKey(sessionId)) {
-                var newSession = new TSession();
+                var newSession = new TSession() { Context = context };
                 Sessions.Add(sessionId, newSession);
                 return newSession;
             }
@@ -64,7 +69,8 @@ namespace Woof.WebSocket {
         }
 
         private ISession Session;
-        private SessionCollection Sessions;
+        
+
         private ObjectIDGenerator IdGenerator;
 
     }
