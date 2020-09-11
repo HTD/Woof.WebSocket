@@ -78,6 +78,11 @@
             Basic client session data, provides secret key for the client.
             </summary>
         </member>
+        <member name="P:Woof.WebSocket.ClientSession.Context">
+            <summary>
+            Gets a WebSocket context for the session.
+            </summary>
+        </member>
         <member name="P:Woof.WebSocket.ClientSession.Key">
             <summary>
             Gets or sets a message signing key for the session.
@@ -319,9 +324,14 @@
             A session having a message signing key.
             </summary>
         </member>
+        <member name="P:Woof.WebSocket.ISession.Context">
+            <summary>
+            Gets a WebSocket context for the session.
+            </summary>
+        </member>
         <member name="P:Woof.WebSocket.ISession.Key">
             <summary>
-            Gets or sets a message signing key for the session.
+            Gets a message signing key for the session.
             </summary>
         </member>
         <member name="T:Woof.WebSocket.ISignInRequest">
@@ -717,6 +727,11 @@
         <member name="T:Woof.WebSocket.SessionProvider">
             <summary>
             Provides session management for both client and server.
+            </summary>
+        </member>
+        <member name="P:Woof.WebSocket.SessionProvider.Sessions">
+            <summary>
+            Gets the sessions collection for the server instance.
             </summary>
         </member>
         <member name="M:Woof.WebSocket.SessionProvider.OpenSession(Woof.WebSocket.WebSocketContext)">

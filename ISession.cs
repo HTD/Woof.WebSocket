@@ -6,9 +6,14 @@
     public interface ISession {
 
         /// <summary>
-        /// Gets or sets a message signing key for the session.
+        /// Gets a WebSocket context for the session.
         /// </summary>
-        public byte[] Key { get; set; }
+        WebSocketContext Context { get; set; }
+
+        /// <summary>
+        /// Gets a message signing key for the session.
+        /// </summary>
+        byte[] Key { get; set; }
 
     }
 

@@ -2,9 +2,11 @@
 
 namespace Woof.WebSocket.Test.Api {
 
-    public class ApiClientSession : ISession {
+    public class Session : ISession {
 
-        public ApiClientSession() => Guid = Guid.NewGuid();
+        public Session() => Guid = Guid.NewGuid();
+
+        public WebSocketContext Context { get; set; }
 
         public Guid Guid { get; set; }
 

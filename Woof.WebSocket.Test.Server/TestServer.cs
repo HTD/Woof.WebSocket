@@ -32,7 +32,7 @@ namespace Woof.WebSocket.Test.Server {
             }
             switch (decodeResult.Message) {
                 case SignInRequest signInRequest:
-                    var session = SessionProvider.GetSession<ApiClientSession>(context);
+                    var session = SessionProvider.GetSession<Session>(context);
                     session.Key = await AuthenticationProvider.GetKeyAsync(signInRequest.ApiKey);
                     await SendMessageAsync(new SignInResponse { IsSuccess = decodeResult.IsSignatureValid && session.Key != null }, context, decodeResult.MessageId);
                     break;

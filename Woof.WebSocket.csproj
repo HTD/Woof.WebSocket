@@ -8,7 +8,8 @@ WOOF subprotocol is based on Google Protocol Buffers to serialize data and fixed
     <Copyright>(c)2020 by CodeDog Ltd</Copyright>
     <PackageProjectUrl>https://github.com/HTD/Woof.WebSocket</PackageProjectUrl>
     <PackageTags>WebSocket</PackageTags>
-    <PackageReleaseNotes>FIX: SubProtocolCodec.GetKey().</PackageReleaseNotes>
+    <PackageReleaseNotes>FIX: ISession contain WebSocketContext. (Possibly breaking change.)
+FIX: Sessions made a public property in SessionProvider.</PackageReleaseNotes>
     <Authors>Adam Łyskawa</Authors>
     <Company>CodeDog Ltd</Company>
     <PackageLicenseExpression></PackageLicenseExpression>
@@ -16,7 +17,7 @@ WOOF subprotocol is based on Google Protocol Buffers to serialize data and fixed
     <Product>Woof.WebSocket</Product>
     <PackageId>Woof.WebSocket</PackageId>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
