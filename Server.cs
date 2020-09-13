@@ -87,6 +87,17 @@ namespace Woof.WebSocket {
         /// <summary>
         /// Sends a message to the specified context.
         /// </summary>
+        /// <param name="message">Message to send.</param>
+        /// <param name="typeHint">Type hint.</param>
+        /// <param name="context">Target context.</param>
+        /// <param name="id">Optional message identifier, if not set - new unique identifier will be used.</param>
+        /// <returns>Task completed when the sending is done.</returns>
+        public new async Task SendMessageAsync(object message, Type typeHint, WebSocketContext context, Guid id = default)
+            => await base.SendMessageAsync(message, typeHint, context, id);
+
+        /// <summary>
+        /// Sends a message to the specified context.
+        /// </summary>
         /// <typeparam name="T">Type of the message.</typeparam>
         /// <param name="message">Message to send.</param>
         /// <param name="context">Target context.</param>
@@ -98,6 +109,15 @@ namespace Woof.WebSocket {
         /// <summary>
         /// Sends a message to the specified context and awaits until the response of the specified type is received.
         /// </summary>
+        /// <param name="request">Request message.</param>
+        /// <param name="context">Target context.</param>
+        /// <returns>Task returning the response message.</returns>
+        public new async Task<object> SendAndReceiveAsync(object request, WebSocketContext context)
+            => await base.SendAndReceiveAsync(request, context);
+
+        /// <summary>
+        /// Sends a message to the specified context and awaits until the response of the specified type is received.
+        /// </summary>
         /// <typeparam name="TRequest">Request message type.</typeparam>
         /// <typeparam name="TResponse">Response message type.</typeparam>
         /// <param name="request">Request message.</param>
@@ -105,6 +125,14 @@ namespace Woof.WebSocket {
         /// <returns>Task returning the response message.</returns>
         public new async Task<TResponse> SendAndReceiveAsync<TRequest, TResponse>(TRequest request, WebSocketContext context)
             => await base.SendAndReceiveAsync<TRequest, TResponse>(request, context);
+
+        /// <summary>
+        /// Sends a message to all connected clients.
+        /// </summary>
+        /// <param name="message">Message to send.</param>
+        /// <param name="typeHint">Type hint.</param>
+        public void BroadcastMessageAsync(object message, Type typeHint = null)
+            => Parallel.ForEach(Clients, async context => await base.SendMessageAsync(message, typeHint, context));
 
         /// <summary>
         /// Sends a message to all connected clients.

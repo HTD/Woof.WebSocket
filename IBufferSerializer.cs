@@ -9,6 +9,14 @@ namespace Woof.WebSocket {
     public interface IBufferSerializer {
 
         /// <summary>
+        /// Serializes the message to the buffer.
+        /// </summary>
+        /// <param name="message">Message.</param>
+        /// <param name="typeHint">Type hint.</param>
+        /// <returns>Buffer.</returns>
+        public ArraySegment<byte> Serialize(object message, Type typeHint = null);
+
+        /// <summary>
         /// Serializes a message to a buffer.
         /// </summary>
         /// <typeparam name="TMessage">Message type.</typeparam>

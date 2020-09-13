@@ -70,6 +70,14 @@ namespace Woof.WebSocket {
         /// <summary>
         /// Sends a message to the server context and awaits until the response of the specified type is received.
         /// </summary>
+        /// <param name="request">Request message.</param>
+        /// <returns>Task returning the response message.</returns>
+        public async Task<object> SendAndReceiveAsync(object request)
+            => await SendAndReceiveAsync(request, Context);
+
+        /// <summary>
+        /// Sends a message to the server context and awaits until the response of the specified type is received.
+        /// </summary>
         /// <typeparam name="TRequest">Request message type.</typeparam>
         /// <typeparam name="TResponse">Response message type.</typeparam>
         /// <param name="request">Request message.</param>

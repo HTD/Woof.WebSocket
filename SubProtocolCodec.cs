@@ -53,6 +53,17 @@ namespace Woof.WebSocket {
         /// <summary>
         /// Encodes the message and sends it to the WebSocket context.
         /// </summary>
+        /// <param name="context">WebSocket context.</param>
+        /// <param name="token">Cancellation token.</param>
+        /// <param name="message">Message to send.</param>
+        /// <param name="typeHint">Type hint.</param>
+        /// <param name="id">Optional message identifier, if not set - new unique identifier will be used.</param>
+        /// <returns>Task completed when the message is sent.</returns>
+        public abstract Task EncodeMessageAsync(WebSocketContext context, CancellationToken token, object message, Type typeHint = null, Guid id = default);
+
+        /// <summary>
+        /// Encodes the message and sends it to the WebSocket context.
+        /// </summary>
         /// <typeparam name="TMessage">Message type.</typeparam>
         /// <param name="context">WebSocket context.</param>
         /// <param name="token">Cancellation token.</param>

@@ -46,7 +46,7 @@ namespace Woof.WebSocket {
                 .SelectMany(a => a.GetTypes())
                 .Where(t => t.GetCustomAttribute<MessageAttribute>() != null)
                 .Select(t => new { Type = t, Meta = t.GetCustomAttribute<MessageAttribute>() })) {
-                MessageTypes.Add(t.Meta.MessageTypeId, new MessageTypeContext(t.Type, t.Meta.IsSigned, t.Meta.IsSignInRequest, t.Meta.IsError));
+                MessageTypes.Add(t.Meta.MessageTypeId, new MessageTypeContext(t.Meta.MessageTypeId, t.Type, t.Meta.IsSigned, t.Meta.IsSignInRequest, t.Meta.IsError));
             }
         }
 
@@ -106,6 +106,22 @@ namespace Woof.WebSocket {
         /// <summary>
         /// Encodes the message and sends it to the WebSocket context.
         /// </summary>
+        /// <param name="context">WebSocket context.</param>
+        /// <param name="token">Cancellation token.</param>
+        /// <param name="message">Message to send.</param>
+        /// <param name="typeHint">Type hint.</param>
+        /// <param name="id">Optional message identifier, if not set - new unique identifier will be used.</param>
+        /// <returns>Task completed when the message is sent.</returns>
+        public override async Task EncodeMessageAsync(WebSocketContext context, CancellationToken token, object message, Type typeHint = null, Guid id = default) {
+            if (!context.IsOpen) return;
+            var typeContext = MessageTypes.GetContext(message, typeHint);
+            var messageBuffer = Serializer.Serialize(message, typeHint);
+            await EncodeMessageAsync(context, token, typeContext, messageBuffer, id);
+        }
+
+        /// <summary>
+        /// Encodes the message and sends it to the WebSocket context.
+        /// </summary>
         /// <typeparam name="TMessage">Message type.</typeparam>
         /// <param name="context">WebSocket context.</param>
         /// <param name="token">Cancellation token.</param>
@@ -114,35 +130,46 @@ namespace Woof.WebSocket {
         /// <returns>Task completed when the message is sent.</returns>
         public override async Task EncodeMessageAsync<TMessage>(WebSocketContext context, CancellationToken token, TMessage message, Guid id = default) {
             if (!context.IsOpen) return;
-            var typeId = MessageTypes.GetTypeId<TMessage>();
-            var typeContext = MessageTypes[typeId];
+            var typeContext = MessageTypes.GetContext<TMessage>();
             var messageBuffer = Serializer.Serialize(message);
-            var isPayloadPresent = messageBuffer.Count > 0;
+            await EncodeMessageAsync(context, token, typeContext, messageBuffer, id);
+        }
+
+        /// <summary>
+        /// Encodes a serialized message and sends it to the WebSocket context.
+        /// </summary>
+        /// <param name="context">WebSocket context.</param>
+        /// <param name="token">Cancellation token.</param>
+        /// <param name="typeContext">Type context.</param>
+        /// <param name="buffer">A buffer with the message already encoded.</param>
+        /// <param name="id">Optional message identifier, if not set - new unique identifier will be used.</param>
+        /// <returns>Task completed when the message is sent.</returns>
+        private async Task EncodeMessageAsync(WebSocketContext context, CancellationToken token, MessageTypeContext typeContext, ArraySegment<byte> buffer, Guid id = default) {
+            var isPayloadPresent = buffer.Count > 0;
             var key = typeContext.IsSigned ? State.SessionProvider.GetKey(context) : null;
             var metadata =
                 key is null || !isPayloadPresent
                 ? new MessageMetadata {
                     Id = id == default ? NewId : id,
-                    TypeId = typeId,
-                    PayloadLength = messageBuffer.Count
+                    TypeId = typeContext.Id,
+                    PayloadLength = buffer.Count
                 }
                 : new MessageMetadata {
                     Id = id == default ? NewId : id,
-                    TypeId = typeId,
-                    PayloadLength = messageBuffer.Count,
-                    Signature = Sign(messageBuffer, key)
+                    TypeId = typeContext.Id,
+                    PayloadLength = buffer.Count,
+                    Signature = Sign(buffer, key)
                 };
             var metaDataBuffer = Serializer.Serialize(metadata);
             var metaSizeBuffer = new ArraySegment<byte>(new byte[1]);
             metaSizeBuffer.Array[0] = (byte)metaDataBuffer.Count;
             var messageParts =
-                isPayloadPresent 
-                ? new ArraySegment<byte>[] { metaSizeBuffer, metaDataBuffer, messageBuffer }
+                isPayloadPresent
+                ? new ArraySegment<byte>[] { metaSizeBuffer, metaDataBuffer, buffer }
                 : new ArraySegment<byte>[] { metaSizeBuffer, metaDataBuffer };
             if (!context.IsOpen) return;
             await context.SendAsync(messageParts, WebSocketMessageType.Binary, token);
         }
-
 
         #endregion
 

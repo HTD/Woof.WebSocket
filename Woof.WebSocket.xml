@@ -46,6 +46,13 @@
             <param name="id">Optional message identifier, if not set - new unique identifier will be used.</param>
             <returns>Task completed when the sending is done.</returns>
         </member>
+        <member name="M:Woof.WebSocket.Client`1.SendAndReceiveAsync(System.Object)">
+            <summary>
+            Sends a message to the server context and awaits until the response of the specified type is received.
+            </summary>
+            <param name="request">Request message.</param>
+            <returns>Task returning the response message.</returns>
+        </member>
         <member name="M:Woof.WebSocket.Client`1.SendAndReceiveAsync``2(``0)">
             <summary>
             Sends a message to the server context and awaits until the response of the specified type is received.
@@ -295,6 +302,14 @@
             <see cref="T:System.ArraySegment`1"/> is used as a buffer.
             </summary>
         </member>
+        <member name="M:Woof.WebSocket.IBufferSerializer.Serialize(System.Object,System.Type)">
+            <summary>
+            Serializes the message to the buffer.
+            </summary>
+            <param name="message">Message.</param>
+            <param name="typeHint">Type hint.</param>
+            <returns>Buffer.</returns>
+        </member>
         <member name="M:Woof.WebSocket.IBufferSerializer.Serialize``1(``0)">
             <summary>
             Serializes a message to a buffer.
@@ -447,6 +462,11 @@
             Message type with some metadata.
             </summary>
         </member>
+        <member name="P:Woof.WebSocket.MessageTypeContext.Id">
+            <summary>
+            Gets the message type identifier.
+            </summary>
+        </member>
         <member name="P:Woof.WebSocket.MessageTypeContext.MessageType">
             <summary>
             Gets the message type.
@@ -467,10 +487,11 @@
             Gets a value indicating whether the message is an error message.
             </summary>
         </member>
-        <member name="M:Woof.WebSocket.MessageTypeContext.#ctor(System.Type,System.Boolean,System.Boolean,System.Boolean)">
+        <member name="M:Woof.WebSocket.MessageTypeContext.#ctor(System.Int32,System.Type,System.Boolean,System.Boolean,System.Boolean)">
             <summary>
             Creates a new message type context.
             </summary>
+            <param name="id">Message type identifier.</param>
             <param name="messageType">Message type.</param>
             <param name="isSigned">True if message should be signed.</param>
             <param name="isSignInRequest">True if the message is a sign in request.</param>
@@ -478,14 +499,22 @@
         </member>
         <member name="T:Woof.WebSocket.MessageTypeDictionary">
             <summary>
-            Message type dictionary used to resolve message type from type identifier read from message header.
+            Message type dictionary used to resolve message type context from type identifier read from message header.
             </summary>
         </member>
-        <member name="M:Woof.WebSocket.MessageTypeDictionary.GetTypeId``1">
+        <member name="M:Woof.WebSocket.MessageTypeDictionary.GetContext(System.Object,System.Type)">
             <summary>
-            Gets the type identifier for the specified type if defined.
+            Gets the type context for the specified instance if defined.
             </summary>
-            <returns>Type identifier.</returns>
+            <param name="instance">Message instance.</param>
+            <param name="typeHint">Type hint.</param>
+            <returns>Type context.</returns>
+        </member>
+        <member name="M:Woof.WebSocket.MessageTypeDictionary.GetContext``1">
+            <summary>
+            Gets the type context for the specified type if defined.
+            </summary>
+            <returns>Type context.</returns>
             <exception cref="T:System.InvalidOperationException">Thrown when the type does not exists in the dictionary.</exception>
         </member>
         <member name="T:Woof.WebSocket.ProtoBufSerializer">
@@ -509,6 +538,14 @@
             <param name="source">Buffer.</param>
             <returns>Message.</returns>
         </member>
+        <member name="M:Woof.WebSocket.ProtoBufSerializer.Serialize(System.Object,System.Type)">
+            <summary>
+            Serializes the message to the buffer.
+            </summary>
+            <param name="message">Message.</param>
+            <param name="typeHint">Type hint.</param>
+            <returns>Buffer.</returns>
+        </member>
         <member name="M:Woof.WebSocket.ProtoBufSerializer.Serialize``1(``0)">
             <summary>
             Serializes the message to the buffer.
@@ -516,6 +553,11 @@
             <typeparam name="TMessage">Message type.</typeparam>
             <param name="message">Message.</param>
             <returns>Buffer.</returns>
+        </member>
+        <member name="F:Woof.WebSocket.ProtoBufSerializer.GenericSerializer">
+            <summary>
+            Generic serializer method to use with run-time types.
+            </summary>
         </member>
         <member name="T:Woof.WebSocket.RequestIncompleteCollection">
             <summary>
@@ -615,6 +657,16 @@
             </summary>
             <returns>Task completed when all server tasks are stopped and all connections are closed.</returns>
         </member>
+        <member name="M:Woof.WebSocket.Server`1.SendMessageAsync(System.Object,System.Type,Woof.WebSocket.WebSocketContext,System.Guid)">
+            <summary>
+            Sends a message to the specified context.
+            </summary>
+            <param name="message">Message to send.</param>
+            <param name="typeHint">Type hint.</param>
+            <param name="context">Target context.</param>
+            <param name="id">Optional message identifier, if not set - new unique identifier will be used.</param>
+            <returns>Task completed when the sending is done.</returns>
+        </member>
         <member name="M:Woof.WebSocket.Server`1.SendMessageAsync``1(``0,Woof.WebSocket.WebSocketContext,System.Guid)">
             <summary>
             Sends a message to the specified context.
@@ -625,6 +677,14 @@
             <param name="id">Optional message identifier, if not set - new unique identifier will be used.</param>
             <returns>Task completed when the sending is done.</returns>
         </member>
+        <member name="M:Woof.WebSocket.Server`1.SendAndReceiveAsync(System.Object,Woof.WebSocket.WebSocketContext)">
+            <summary>
+            Sends a message to the specified context and awaits until the response of the specified type is received.
+            </summary>
+            <param name="request">Request message.</param>
+            <param name="context">Target context.</param>
+            <returns>Task returning the response message.</returns>
+        </member>
         <member name="M:Woof.WebSocket.Server`1.SendAndReceiveAsync``2(``0,Woof.WebSocket.WebSocketContext)">
             <summary>
             Sends a message to the specified context and awaits until the response of the specified type is received.
@@ -634,6 +694,13 @@
             <param name="request">Request message.</param>
             <param name="context">Target context.</param>
             <returns>Task returning the response message.</returns>
+        </member>
+        <member name="M:Woof.WebSocket.Server`1.BroadcastMessageAsync(System.Object,System.Type)">
+            <summary>
+            Sends a message to all connected clients.
+            </summary>
+            <param name="message">Message to send.</param>
+            <param name="typeHint">Type hint.</param>
         </member>
         <member name="M:Woof.WebSocket.Server`1.BroadcastMessageAsync``1(``0)">
             <summary>
@@ -828,6 +895,17 @@
             <param name="token">Cancellation token.</param>
             <param name="limit">Optional message length limit, applied if positive value provided.</param>
             <returns>Task returning decoded message with the identifier.</returns>
+        </member>
+        <member name="M:Woof.WebSocket.SubProtocolCodec.EncodeMessageAsync(Woof.WebSocket.WebSocketContext,System.Threading.CancellationToken,System.Object,System.Type,System.Guid)">
+            <summary>
+            Encodes the message and sends it to the WebSocket context.
+            </summary>
+            <param name="context">WebSocket context.</param>
+            <param name="token">Cancellation token.</param>
+            <param name="message">Message to send.</param>
+            <param name="typeHint">Type hint.</param>
+            <param name="id">Optional message identifier, if not set - new unique identifier will be used.</param>
+            <returns>Task completed when the message is sent.</returns>
         </member>
         <member name="M:Woof.WebSocket.SubProtocolCodec.EncodeMessageAsync``1(Woof.WebSocket.WebSocketContext,System.Threading.CancellationToken,``0,System.Guid)">
             <summary>
@@ -1126,6 +1204,16 @@
             <param name="cleanUpAsync">Optional asynchronous clean up function executed after the receiving loop is ended.</param>
             <returns>Created task.</returns>
         </member>
+        <member name="M:Woof.WebSocket.WebSocketTransport`1.SendMessageAsync(System.Object,System.Type,Woof.WebSocket.WebSocketContext,System.Guid)">
+            <summary>
+            Serializes and sends a message to the specified context.
+            </summary>
+            <param name="message">Message to send.</param>
+            <param name="typeHint">Type hint.</param>
+            <param name="context">Target context.</param>
+            <param name="id">Optional message identifier, if not set - new unique identifier will be used.</param>
+            <returns>Task completed when the sending is done.</returns>
+        </member>
         <member name="M:Woof.WebSocket.WebSocketTransport`1.SendMessageAsync``1(``0,Woof.WebSocket.WebSocketContext,System.Guid)">
             <summary>
             Serializes and sends a message to the specified context.
@@ -1135,6 +1223,16 @@
             <param name="context">Target context.</param>
             <param name="id">Optional message identifier, if not set - new unique identifier will be used.</param>
             <returns>Task completed when the sending is done.</returns>
+        </member>
+        <member name="M:Woof.WebSocket.WebSocketTransport`1.SendAndReceiveAsync(System.Object,Woof.WebSocket.WebSocketContext)">
+            <summary>
+            Sends a message to the specified context and awaits until the response of the specified type is received.
+            </summary>
+            <param name="request">Request message.</param>
+            <param name="context">Target context.</param>
+            <returns>Task returning the response message.</returns>
+            <exception cref="T:Woof.WebSocket.UnexpectedMessageException">Thrown when a defined, but unexpected type message is received instead of expected one.</exception>
+            <exception cref="T:System.Threading.Tasks.TaskCanceledException">Thrown when the client or server operation is cancelled.</exception>
         </member>
         <member name="M:Woof.WebSocket.WebSocketTransport`1.SendAndReceiveAsync``2(``0,Woof.WebSocket.WebSocketContext)">
             <summary>
@@ -1192,6 +1290,17 @@
             <param name="limit">Optional message length limit, applied if positive value provided.</param>
             <returns>Task returning decoded message with the identifier.</returns>
         </member>
+        <member name="M:Woof.WebSocket.WoofCodec.EncodeMessageAsync(Woof.WebSocket.WebSocketContext,System.Threading.CancellationToken,System.Object,System.Type,System.Guid)">
+            <summary>
+            Encodes the message and sends it to the WebSocket context.
+            </summary>
+            <param name="context">WebSocket context.</param>
+            <param name="token">Cancellation token.</param>
+            <param name="message">Message to send.</param>
+            <param name="typeHint">Type hint.</param>
+            <param name="id">Optional message identifier, if not set - new unique identifier will be used.</param>
+            <returns>Task completed when the message is sent.</returns>
+        </member>
         <member name="M:Woof.WebSocket.WoofCodec.EncodeMessageAsync``1(Woof.WebSocket.WebSocketContext,System.Threading.CancellationToken,``0,System.Guid)">
             <summary>
             Encodes the message and sends it to the WebSocket context.
@@ -1200,6 +1309,17 @@
             <param name="context">WebSocket context.</param>
             <param name="token">Cancellation token.</param>
             <param name="message">Message to send.</param>
+            <param name="id">Optional message identifier, if not set - new unique identifier will be used.</param>
+            <returns>Task completed when the message is sent.</returns>
+        </member>
+        <member name="M:Woof.WebSocket.WoofCodec.EncodeMessageAsync(Woof.WebSocket.WebSocketContext,System.Threading.CancellationToken,Woof.WebSocket.MessageTypeContext,System.ArraySegment{System.Byte},System.Guid)">
+            <summary>
+            Encodes a serialized message and sends it to the WebSocket context.
+            </summary>
+            <param name="context">WebSocket context.</param>
+            <param name="token">Cancellation token.</param>
+            <param name="typeContext">Type context.</param>
+            <param name="buffer">A buffer with the message already encoded.</param>
             <param name="id">Optional message identifier, if not set - new unique identifier will be used.</param>
             <returns>Task completed when the message is sent.</returns>
         </member>

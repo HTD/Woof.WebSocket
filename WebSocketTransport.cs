@@ -181,6 +181,17 @@ namespace Woof.WebSocket {
         /// <summary>
         /// Serializes and sends a message to the specified context.
         /// </summary>
+        /// <param name="message">Message to send.</param>
+        /// <param name="typeHint">Type hint.</param>
+        /// <param name="context">Target context.</param>
+        /// <param name="id">Optional message identifier, if not set - new unique identifier will be used.</param>
+        /// <returns>Task completed when the sending is done.</returns>
+        protected async Task SendMessageAsync(object message, Type typeHint, WebSocketContext context, Guid id = default)
+            => await Codec.EncodeMessageAsync(context, CancellationToken, message, typeHint, id);
+
+        /// <summary>
+        /// Serializes and sends a message to the specified context.
+        /// </summary>
         /// <typeparam name="TMessage">Message type.</typeparam>
         /// <param name="message">Message to send.</param>
         /// <param name="context">Target context.</param>
@@ -188,6 +199,26 @@ namespace Woof.WebSocket {
         /// <returns>Task completed when the sending is done.</returns>
         protected async Task SendMessageAsync<TMessage>(TMessage message, WebSocketContext context, Guid id = default)
             => await Codec.EncodeMessageAsync(context, CancellationToken, message, id);
+
+        /// <summary>
+        /// Sends a message to the specified context and awaits until the response of the specified type is received.
+        /// </summary>
+        /// <param name="request">Request message.</param>
+        /// <param name="context">Target context.</param>
+        /// <returns>Task returning the response message.</returns>
+        /// <exception cref="UnexpectedMessageException">Thrown when a defined, but unexpected type message is received instead of expected one.</exception>
+        /// <exception cref="TaskCanceledException">Thrown when the client or server operation is cancelled.</exception>
+        protected async Task<object> SendAndReceiveAsync(object request, WebSocketContext context) {
+            var (id, synchronizer) = RequestsIncomplete.NewResponseSynchronizer;
+            try {
+                await SendMessageAsync(request, typeHint: null, context, id);
+                await synchronizer.Semaphore.WaitAsync();
+                return synchronizer.Message;
+            }
+            finally {
+                synchronizer.Dispose();
+            }
+        }
 
         /// <summary>
         /// Sends a message to the specified context and awaits until the response of the specified type is received.

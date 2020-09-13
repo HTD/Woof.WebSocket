@@ -57,7 +57,8 @@ namespace Woof.WebSocket.Test.Server {
                     break;
                 case TimeSubscribeRequest subscribeRequest:
                     await AsyncLoop.FromIterationAsync(async () => {
-                        await SendMessageAsync(new TimeNotification { Time = DateTime.Now }, context);
+                        var boxedMsg = new TimeNotification { Time = DateTime.Now };
+                        await SendMessageAsync(boxedMsg, typeHint: null, context);
                         await Task.Delay(subscribeRequest.Period);
                     }, CancellationToken, OnReceiveException, () => context.IsOpen);
                     break;
