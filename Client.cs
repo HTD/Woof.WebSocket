@@ -60,6 +60,16 @@ namespace Woof.WebSocket {
         /// <summary>
         /// Sends a message to the server context.
         /// </summary>
+        /// <param name="message">Message to send.</param>
+        /// <param name="typeHint">Type hint.</param>
+        /// <param name="id">Optional message identifier, if not set - new unique identifier will be used.</param>
+        /// <returns>Task completed when the sending is done.</returns>
+        public async Task SendMessageAsync(object message, Type typeHint = null, Guid id = default)
+            => await SendMessageAsync(message, typeHint, Context, id);
+
+        /// <summary>
+        /// Sends a message to the server context.
+        /// </summary>
         /// <typeparam name="T">Message type.</typeparam>
         /// <param name="message">Message to send.</param>
         /// <param name="id">Optional message identifier, if not set - new unique identifier will be used.</param>
