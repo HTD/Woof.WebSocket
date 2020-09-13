@@ -473,7 +473,7 @@
         </member>
         <member name="P:Woof.WebSocket.MessageTypeContext.Id">
             <summary>
-            Gets the message type identifier.
+            Gets the message type identifier, if it was set in the constructor. Zero otherwise.
             </summary>
         </member>
         <member name="P:Woof.WebSocket.MessageTypeContext.MessageType">
@@ -501,6 +501,15 @@
             Creates a new message type context.
             </summary>
             <param name="id">Message type identifier.</param>
+            <param name="messageType">Message type.</param>
+            <param name="isSigned">True if message should be signed.</param>
+            <param name="isSignInRequest">True if the message is a sign in request.</param>
+            <param name="isError">True is the message is an error message.</param>
+        </member>
+        <member name="M:Woof.WebSocket.MessageTypeContext.#ctor(System.Type,System.Boolean,System.Boolean,System.Boolean)">
+            <summary>
+            Creates a new message type context.
+            </summary>
             <param name="messageType">Message type.</param>
             <param name="isSigned">True if message should be signed.</param>
             <param name="isSignInRequest">True if the message is a sign in request.</param>
