@@ -11,12 +11,12 @@ namespace Woof.WebSocket {
         /// Creates the exception from the message received.
         /// </summary>
         /// <param name="message">Decoded message received.</param>
-        public UnexpectedMessageException(object message) : base($"{message?.GetType()?.Name ?? "null"} received") => Message = message;
+        public UnexpectedMessageException(object? message) : base($"{message?.GetType()?.Name ?? "null"} received") => Message = message;
 
         /// <summary>
         /// Gets the decoded message received instead of the expected message.
         /// </summary>
-        public new object Message { get; set; }
+        public new object? Message { get; set; }
 
     }
 

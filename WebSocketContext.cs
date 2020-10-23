@@ -19,7 +19,7 @@ namespace Woof.WebSocket {
         /// <summary>
         /// Gets the <see cref="HttpListenerWebSocketContext"/> if the socket was obtained from <see cref="System.Net.HttpListener"/>.
         /// </summary>
-        public HttpListenerWebSocketContext HttpContext { get; }
+        public HttpListenerWebSocketContext? HttpContext { get; }
 
         /// <summary>
         /// Allows the remote endpoint to describe the reason why the connection was closed.
@@ -73,7 +73,7 @@ namespace Woof.WebSocket {
         /// <param name="statusDescription">Specifies a human readable explanation as to why the connection is closed.</param>
         /// <param name="cancellationToken">The token that can be used to propagate notification that operations should be canceled.</param>
         /// <returns>Task completed when connection is closed.</returns>
-        public Task CloseAsync(WebSocketCloseStatus closeStatus, string statusDescription, CancellationToken cancellationToken)
+        public Task CloseAsync(WebSocketCloseStatus closeStatus, string? statusDescription, CancellationToken cancellationToken)
             => Socket.CloseAsync(closeStatus, statusDescription, cancellationToken);
 
         /// <summary>
@@ -83,7 +83,7 @@ namespace Woof.WebSocket {
         /// <param name="statusDescription">Allows applications to specify a human readable explanation as to why the connection is closed.</param>
         /// <param name="cancellationToken">The token that can be used to propagate notification that operations should be canceled.</param>
         /// <returns>Task completed when the CLOSE frame is sent.</returns>
-        public async Task CloseOutputAsync(WebSocketCloseStatus closeStatus, string statusDescription, CancellationToken cancellationToken) {
+        public async Task CloseOutputAsync(WebSocketCloseStatus closeStatus, string? statusDescription, CancellationToken cancellationToken) {
             await Semaphore.WaitAsync();
             try {
                 

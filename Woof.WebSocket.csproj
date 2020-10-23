@@ -3,13 +3,13 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>8.0</LangVersion>
+    <Nullable>enable</Nullable>
     <Description>WebSocket API base using fast and simple WOOF subprotocol.
 WOOF subprotocol is based on Google Protocol Buffers to serialize data and fixed size headers.</Description>
     <Copyright>(c)2020 by CodeDog Ltd</Copyright>
     <PackageProjectUrl>https://github.com/HTD/Woof.WebSocket</PackageProjectUrl>
     <PackageTags>WebSocket</PackageTags>
-    <PackageReleaseNotes>ADD: Support for non generic message use. Breaks codec compatibility!
-ADD: MessageTypeContext() constructor without Int32 identifier.</PackageReleaseNotes>
+    <PackageReleaseNotes>ADD: Nullable project type.</PackageReleaseNotes>
     <Authors>Adam Łyskawa</Authors>
     <Company>CodeDog Ltd</Company>
     <PackageLicenseExpression></PackageLicenseExpression>
@@ -17,7 +17,7 @@ ADD: MessageTypeContext() constructor without Int32 identifier.</PackageReleaseN
     <Product>Woof.WebSocket</Product>
     <PackageId>Woof.WebSocket</PackageId>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>1.1.1</Version>
+    <Version>1.1.2</Version>
     <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>

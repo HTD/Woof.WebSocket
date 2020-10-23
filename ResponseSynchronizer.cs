@@ -12,7 +12,7 @@ namespace Woof.WebSocket {
         /// <summary>
         /// Gets or sets the message object.
         /// </summary>
-        public object Message { get; set; }
+        public object? Message { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the message is valid.

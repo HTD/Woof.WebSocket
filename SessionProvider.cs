@@ -10,7 +10,7 @@ namespace Woof.WebSocket {
         /// <summary>
         /// Gets the sessions collection for the server instance.
         /// </summary>
-        public SessionCollection Sessions { get; private set; }
+        public SessionCollection? Sessions { get; private set; }
 
         /// <summary>
         /// Initializes session identifier for the current client context.<br/>
@@ -27,6 +27,7 @@ namespace Woof.WebSocket {
         /// </summary>
         /// <param name="context">WebSocket from the connected client.</param>
         public void CloseSession(WebSocketContext context) {
+            if (IdGenerator is null || Sessions is null) return;
             var sessionId = IdGenerator.GetId(context, out _);
             Sessions.Remove(sessionId);
         }
@@ -43,7 +44,7 @@ namespace Woof.WebSocket {
         /// <typeparam name="TSession">Session type.</typeparam>
         /// <param name="context">WebSocket from the connected client. Or null for the client single session.</param>
         /// <returns>Session object.</returns>
-        public TSession GetSession<TSession>(WebSocketContext context = null) where TSession : ISession, new() {
+        public TSession GetSession<TSession>(WebSocketContext? context = null) where TSession : ISession, new() {
             if (IdGenerator is null) return (TSession)(Session = new TSession()); // single session, started from client scenario.
             var sessionId = IdGenerator.GetId(context, out _);
             if (Sessions is null) Sessions = new SessionCollection();
@@ -60,18 +61,18 @@ namespace Woof.WebSocket {
         /// </summary>
         /// <param name="context">WebSocket from the connected client.</param>
         /// <returns>Message signing key.</returns>
-        public byte[] GetKey(WebSocketContext context) {
+        public byte[]? GetKey(WebSocketContext context) {
             if (IdGenerator is null && Session is null) return null;
-            if (IdGenerator is null) return Session.Key;
+            if (IdGenerator is null) return Session?.Key;
             var sessionId = IdGenerator.GetId(context, out _);
-            if (Sessions.ContainsKey(sessionId)) return Sessions[sessionId].Key;
+            if (Sessions != null && Sessions.ContainsKey(sessionId)) return Sessions[sessionId].Key;
             return null;
         }
 
-        private ISession Session;
+        private ISession? Session;
         
 
-        private ObjectIDGenerator IdGenerator;
+        private ObjectIDGenerator? IdGenerator;
 
     }
 

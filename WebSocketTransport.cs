@@ -18,17 +18,17 @@ namespace Woof.WebSocket {
         /// <summary>
         /// Occurs when a message is received by the socket.
         /// </summary>
-        public event EventHandler<MessageReceivedEventArgs> MessageReceived;
+        public event EventHandler<MessageReceivedEventArgs>? MessageReceived;
         
         /// <summary>
         /// Occurs when an exception is thrown during receive process.
         /// </summary>
-        public event EventHandler<ExceptionEventArgs> ReceiveException;
+        public event EventHandler<ExceptionEventArgs>? ReceiveException;
 
         /// <summary>
         /// Occurs when the state of the client or server service is changed.
         /// </summary>
-        public event EventHandler<StateChangedEventArgs> StateChanged;
+        public event EventHandler<StateChangedEventArgs>? StateChanged;
 
         #endregion
 
@@ -44,7 +44,7 @@ namespace Woof.WebSocket {
         /// <see cref="IAuthenticationProvider"/> implementation is necessary for built-in API key authentication support.<br/>
         /// <strong>This is not set by default.</strong>
         /// </summary>
-        public IAuthenticationProvider AuthenticationProvider { get; set; }
+        public IAuthenticationProvider? AuthenticationProvider { get; set; }
 
         /// <summary>
         /// Gets the current client or server state.
@@ -78,7 +78,7 @@ namespace Woof.WebSocket {
         /// <summary>
         /// Gets the WebSocket end point URI.
         /// </summary>
-        protected Uri EndPointUri { get; set; }
+        protected Uri? EndPointUri { get; set; }
 
         /// <summary>
         /// A collection of incomplete requests requiring the other party's response.
@@ -136,7 +136,7 @@ namespace Woof.WebSocket {
                     var decodeResult = await Codec.DecodeMessageAsync(context, CancellationToken, MaxReceiveMessageSize);
                     if (decodeResult is null) continue; // we should ignore empty frames, shouldn't we?
                     if (decodeResult.IsCloseFrame) break;
-                    if (RequestsIncomplete.TryRemoveResponseSynchronizer(decodeResult.MessageId, out var responseSynchronizer)) {
+                    if (RequestsIncomplete.TryRemoveResponseSynchronizer(decodeResult.MessageId, out var responseSynchronizer) && responseSynchronizer != null) {
                         responseSynchronizer.Message = decodeResult.Message;
                         responseSynchronizer.Semaphore.Release();
                     }
@@ -162,7 +162,7 @@ namespace Woof.WebSocket {
         /// <param name="token">Cancellation token used to cancel the task created.</param>
         /// <param name="cleanUpAsync">Optional asynchronous clean up function executed after the receiving loop is ended.</param>
         /// <returns>Created task.</returns>
-        protected async Task StartReceiveAsync(WebSocketContext context, CancellationToken token, Func<WebSocketContext, Task> cleanUpAsync = null) {
+        protected async Task StartReceiveAsync(WebSocketContext context, CancellationToken token, Func<WebSocketContext, Task>? cleanUpAsync = null) {
             if (cleanUpAsync is null)
                 await Task.Factory.StartNew(
                     async() => await Receive(context),
@@ -186,7 +186,7 @@ namespace Woof.WebSocket {
         /// <param name="context">Target context.</param>
         /// <param name="id">Optional message identifier, if not set - new unique identifier will be used.</param>
         /// <returns>Task completed when the sending is done.</returns>
-        protected async Task SendMessageAsync(object message, Type typeHint, WebSocketContext context, Guid id = default)
+        protected async Task SendMessageAsync(object message, Type? typeHint, WebSocketContext context, Guid id = default)
             => await Codec.EncodeMessageAsync(context, CancellationToken, message, typeHint, id);
 
         /// <summary>
@@ -208,7 +208,7 @@ namespace Woof.WebSocket {
         /// <returns>Task returning the response message.</returns>
         /// <exception cref="UnexpectedMessageException">Thrown when a defined, but unexpected type message is received instead of expected one.</exception>
         /// <exception cref="TaskCanceledException">Thrown when the client or server operation is cancelled.</exception>
-        protected async Task<object> SendAndReceiveAsync(object request, WebSocketContext context) {
+        protected async Task<object?> SendAndReceiveAsync(object request, WebSocketContext context) {
             var (id, synchronizer) = RequestsIncomplete.NewResponseSynchronizer;
             try {
                 await SendMessageAsync(request, typeHint: null, context, id);
@@ -250,7 +250,7 @@ namespace Woof.WebSocket {
         /// <summary>
         /// A cancellation token source used to cancel all the client and server tasks.
         /// </summary>
-        protected CancellationTokenSource CTS;
+        protected CancellationTokenSource? CTS;
 
         #endregion
 

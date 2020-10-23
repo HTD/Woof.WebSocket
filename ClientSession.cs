@@ -8,12 +8,12 @@
         /// <summary>
         /// Gets a WebSocket context for the session.
         /// </summary>
-        public WebSocketContext Context { get; set; }
+        public WebSocketContext? Context { get; set; }
 
         /// <summary>
         /// Gets or sets a message signing key for the session.
         /// </summary>
-        public byte[] Key { get; set; }
+        public byte[]? Key { get; set; }
 
         
     }

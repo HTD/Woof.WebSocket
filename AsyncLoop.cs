@@ -21,8 +21,8 @@ namespace Woof.WebSocket {
         public static async Task FromIterationAsync(
             Func<Task> iteration,
             CancellationToken token,
-            Action<Exception> exceptionHandler = null,
-            Func<bool> condition = null,
+            Action<Exception>? exceptionHandler = null,
+            Func<bool>? condition = null,
             bool breakOnException = false
         ) => await Task.Factory.StartNew(async () => {
             try {

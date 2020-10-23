@@ -19,7 +19,9 @@ namespace Woof.WebSocket {
         /// <summary>
         /// Gets or sets the state used to access <see cref="SessionProvider"/> and <see cref="IAuthenticationProvider"/>.
         /// </summary>
+#pragma warning disable CS8618 // Non-nullable field is uninitialized. But should always be initialized by WebSocketTransport instance.
         public IStateProvider State { get; internal set; }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
 
         /// <summary>
         /// Gets the subprotocol name.
@@ -59,7 +61,7 @@ namespace Woof.WebSocket {
         /// <param name="typeHint">Type hint.</param>
         /// <param name="id">Optional message identifier, if not set - new unique identifier will be used.</param>
         /// <returns>Task completed when the message is sent.</returns>
-        public abstract Task EncodeMessageAsync(WebSocketContext context, CancellationToken token, object message, Type typeHint = null, Guid id = default);
+        public abstract Task EncodeMessageAsync(WebSocketContext context, CancellationToken token, object message, Type? typeHint = null, Guid id = default);
 
         /// <summary>
         /// Encodes the message and sends it to the WebSocket context.

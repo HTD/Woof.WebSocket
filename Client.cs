@@ -43,9 +43,11 @@ namespace Woof.WebSocket {
             State = ServiceState.Stopping;
             OnStateChanged(State);
             try {
-                CTS.CancelAfter(TimeSpan.FromSeconds(2));
-                await Context.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, null, CTS.Token);
-                await Context.CloseAsync(WebSocketCloseStatus.NormalClosure, null, CTS.Token);
+                if (Context != null && CTS != null) {
+                    CTS.CancelAfter(TimeSpan.FromSeconds(2));
+                    await Context.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, null, CTS.Token);
+                    await Context.CloseAsync(WebSocketCloseStatus.NormalClosure, null, CTS.Token);
+                }
             } catch (Exception) { }
             finally {
                 Context?.Dispose();
@@ -64,8 +66,9 @@ namespace Woof.WebSocket {
         /// <param name="typeHint">Type hint.</param>
         /// <param name="id">Optional message identifier, if not set - new unique identifier will be used.</param>
         /// <returns>Task completed when the sending is done.</returns>
-        public async Task SendMessageAsync(object message, Type typeHint = null, Guid id = default)
-            => await SendMessageAsync(message, typeHint, Context, id);
+        public async Task SendMessageAsync(object message, Type? typeHint = null, Guid id = default) {
+            if (Context != null) await SendMessageAsync(message, typeHint, Context, id);
+        }
 
         /// <summary>
         /// Sends a message to the server context.
@@ -74,16 +77,17 @@ namespace Woof.WebSocket {
         /// <param name="message">Message to send.</param>
         /// <param name="id">Optional message identifier, if not set - new unique identifier will be used.</param>
         /// <returns>Task completed when the sending is done.</returns>
-        public async Task SendMessageAsync<T>(T message, Guid id = default)
-            => await SendMessageAsync(message, Context, id);
+        public async Task SendMessageAsync<T>(T message, Guid id = default) { 
+            if (Context != null) await SendMessageAsync(message, Context, id);
+        }
 
         /// <summary>
         /// Sends a message to the server context and awaits until the response of the specified type is received.
         /// </summary>
         /// <param name="request">Request message.</param>
         /// <returns>Task returning the response message.</returns>
-        public async Task<object> SendAndReceiveAsync(object request)
-            => await SendAndReceiveAsync(request, Context);
+        public async Task<object?> SendAndReceiveAsync(object request)
+            => Context != null ? await SendAndReceiveAsync(request, Context) : null;
 
         /// <summary>
         /// Sends a message to the server context and awaits until the response of the specified type is received.
@@ -92,8 +96,10 @@ namespace Woof.WebSocket {
         /// <typeparam name="TResponse">Response message type.</typeparam>
         /// <param name="request">Request message.</param>
         /// <returns>Task returning the response message.</returns>
-        public async Task<TResponse> SendAndReceiveAsync<TRequest, TResponse>(TRequest request)
-            => await SendAndReceiveAsync<TRequest, TResponse>(request, Context);
+        public async Task<TResponse> SendAndReceiveAsync<TRequest, TResponse>(TRequest request) {
+            if (Context is null) throw new NullReferenceException("There is no context for that request. The Client is not started.");
+            return await SendAndReceiveAsync<TRequest, TResponse>(request, Context);
+        }
 
         /// <summary>
         /// Disposes all resources used by the client.
@@ -119,7 +125,7 @@ namespace Woof.WebSocket {
         /// <summary>
         /// WebSocket context used to exchange binary data with the server.
         /// </summary>
-        WebSocketContext Context;
+        WebSocketContext? Context;
 
         #endregion
     

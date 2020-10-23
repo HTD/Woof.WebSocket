@@ -34,11 +34,14 @@ namespace Woof.WebSocket {
         /// <param name="message">Message.</param>
         /// <param name="typeHint">Type hint.</param>
         /// <returns>Buffer.</returns>
-        public ArraySegment<byte> Serialize(object message, Type typeHint = null) {
+        public ArraySegment<byte> Serialize(object? message, Type? typeHint = null) {
             if (message is null && typeHint is null) throw new ArgumentNullException();
             using var targetStream = new MemoryStream();
-            var messageType = typeHint ?? message.GetType();
-            GenericSerializer.MakeGenericMethod(messageType).Invoke(null, new object[] { targetStream, message });
+            var messageType = typeHint ?? message?.GetType();
+            if (messageType != null)
+#pragma warning disable CS8601 // Possible null reference assignment. Null message is valid here.
+                GenericSerializer.MakeGenericMethod(messageType).Invoke(null, new object[] { targetStream, message });
+#pragma warning restore CS8601 // Possible null reference assignment.
             targetStream.TryGetBuffer(out var buffer);
             return buffer;
         }

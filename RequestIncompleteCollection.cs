@@ -37,7 +37,7 @@ namespace Woof.WebSocket {
         /// <param name="id">Message identifier.</param>
         /// <param name="responseSynchronizer">Response synchronizer.</param>
         /// <returns>True, if the response synchronizer was stored in the collection.</returns>
-        public bool TryRemoveResponseSynchronizer(Guid id, out ResponseSynchronizer responseSynchronizer) {
+        public bool TryRemoveResponseSynchronizer(Guid id, out ResponseSynchronizer? responseSynchronizer) {
             if (ContainsKey(id)) {
                 responseSynchronizer = this[id];
                 Remove(id);

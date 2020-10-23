@@ -13,7 +13,7 @@
         /// <summary>
         /// Gets or sets a module that allows ansynchronous authentication of the API key.
         /// </summary>
-        public IAuthenticationProvider AuthenticationProvider { get; set; }
+        public IAuthenticationProvider? AuthenticationProvider { get; set; }
 
     }
 

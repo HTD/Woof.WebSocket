@@ -11,7 +11,7 @@ namespace Woof.WebSocket {
         /// <summary>
         /// Gets the decoded message.
         /// </summary>
-        public object Message { get; }
+        public object? Message { get; }
 
         /// <summary>
         /// Gets the message identifier.
@@ -21,7 +21,7 @@ namespace Woof.WebSocket {
         /// <summary>
         /// Gets the message type context.
         /// </summary>
-        public MessageTypeContext TypeContext { get; }
+        public MessageTypeContext? TypeContext { get; }
 
         /// <summary>
         /// Gets a value indicating whether the CLOSE frame was received instead of a message.
@@ -47,7 +47,7 @@ namespace Woof.WebSocket {
         /// <summary>
         /// Gets an exception caught during receiving the message.
         /// </summary>
-        public Exception Exception { get; }
+        public Exception? Exception { get; }
 
         /// <summary>
         /// Gets the WebSocket close status if the CLOSE frame was received.
@@ -57,7 +57,7 @@ namespace Woof.WebSocket {
         /// <summary>
         /// Gets the WebSocket close status description if the CLOSE frame was received.
         /// </summary>
-        public string CloseStatusDescription { get; }
+        public string? CloseStatusDescription { get; }
 
         /// <summary>
         /// Creates "full" decode result with the received and decoded message.
@@ -67,7 +67,7 @@ namespace Woof.WebSocket {
         /// <param name="id">Message identifier.</param>
         /// <param name="isValidSignatureRequired">True, if a valid signature of the message is required.</param>
         /// <param name="isSignatureValid">True, if the message signature is verified.</param>
-        public DecodeResult(MessageTypeContext typeContext, object message, Guid id, bool isValidSignatureRequired = false, bool isSignatureValid = false) {
+        public DecodeResult(MessageTypeContext? typeContext, object? message, Guid id, bool isValidSignatureRequired = false, bool isSignatureValid = false) {
             TypeContext = typeContext;
             MessageId = id;
             Message = message;

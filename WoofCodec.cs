@@ -93,7 +93,10 @@ namespace Woof.WebSocket {
             if (typeContext.IsSigned && metaData.Signature != null) {
                 var key =
                     isSignInRequest
-                    ? await State.AuthenticationProvider?.GetKeyAsync((message as ISignInRequest).ApiKey)
+                    ? (message is ISignInRequest signInRequest && State.AuthenticationProvider != null 
+                        ? await State.AuthenticationProvider.GetKeyAsync(signInRequest.ApiKey) 
+                        : null
+                    )
                     : State.SessionProvider.GetKey(context);
                 if (key != null) {
                     byte[] expected = Sign(messageBuffer, key);
@@ -112,7 +115,7 @@ namespace Woof.WebSocket {
         /// <param name="typeHint">Type hint.</param>
         /// <param name="id">Optional message identifier, if not set - new unique identifier will be used.</param>
         /// <returns>Task completed when the message is sent.</returns>
-        public override async Task EncodeMessageAsync(WebSocketContext context, CancellationToken token, object message, Type typeHint = null, Guid id = default) {
+        public override async Task EncodeMessageAsync(WebSocketContext context, CancellationToken token, object message, Type? typeHint = null, Guid id = default) {
             if (!context.IsOpen) return;
             var typeContext = MessageTypes.GetContext(message, typeHint);
             var messageBuffer = Serializer.Serialize(message, typeHint);

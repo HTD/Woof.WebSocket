@@ -10,7 +10,7 @@ namespace Woof.WebSocket {
         /// <summary>
         /// Gets the decoded message.
         /// </summary>
-        public object Message => DecodeResult.Message;
+        public object? Message => DecodeResult.Message;
 
         /// <summary>
         /// Gets the decoded message identifier.

@@ -32,7 +32,7 @@ namespace Woof.WebSocket {
         /// Optional message signature.
         /// </summary>
         [ProtoMember(4)]
-        public byte[] Signature { get; set; }
+        public byte[]? Signature { get; set; }
 
     }
 

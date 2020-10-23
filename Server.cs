@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Data.SqlTypes;
 
 namespace Woof.WebSocket {
 
@@ -21,18 +22,18 @@ namespace Woof.WebSocket {
         /// <summary>
         /// Occurs when a client is connected to the server.
         /// </summary>
-        public event EventHandler<WebSocketEventArgs> ClientConnected;
+        public event EventHandler<WebSocketEventArgs>? ClientConnected;
 
         /// <summary>
         /// Occurs when a client is disconnecting from the server it's the last time the client data is available.<br/>
         /// The connection is not closed until all handlers complete.
         /// </summary>
-        public event EventHandler<WebSocketEventArgs> ClientDisconnecting;
+        public event EventHandler<WebSocketEventArgs>? ClientDisconnecting;
 
         /// <summary>
         /// Occurs when an exception is thrown during client connection process.
         /// </summary>
-        public event EventHandler<ExceptionEventArgs> ConnectException;
+        public event EventHandler<ExceptionEventArgs>? ConnectException;
 
         #endregion
 
@@ -43,6 +44,7 @@ namespace Woof.WebSocket {
         /// </summary>
         /// <returns>Task completed when the server is initialized and in listening state.</returns>
         public async Task StartAsync() {
+            if (EndPointUri is null) throw new NullReferenceException($"{nameof(EndPointUri)} should be set before calling {nameof(StartAsync)}");
             if (CTS != null || Listener != null || State == ServiceState.Started) throw new InvalidOperationException("Server already started");
             if (State == ServiceState.Starting) throw new InvalidOperationException("Server is starting");
             State = ServiceState.Starting;
@@ -62,7 +64,7 @@ namespace Woof.WebSocket {
         /// </summary>
         /// <returns>Task completed when all server tasks are stopped and all connections are closed.</returns>
         public async Task StopAsync() {
-            if (CTS is null && Listener is null) return;
+            if (CTS is null || Listener is null) return;
             State = ServiceState.Stopping;
             OnStateChanged(State);
             CTS.CancelAfter(TimeSpan.FromSeconds(2));
@@ -112,7 +114,7 @@ namespace Woof.WebSocket {
         /// <param name="request">Request message.</param>
         /// <param name="context">Target context.</param>
         /// <returns>Task returning the response message.</returns>
-        public new async Task<object> SendAndReceiveAsync(object request, WebSocketContext context)
+        public new async Task<object?> SendAndReceiveAsync(object request, WebSocketContext context)
             => await base.SendAndReceiveAsync(request, context);
 
         /// <summary>
@@ -131,7 +133,7 @@ namespace Woof.WebSocket {
         /// </summary>
         /// <param name="message">Message to send.</param>
         /// <param name="typeHint">Type hint.</param>
-        public void BroadcastMessageAsync(object message, Type typeHint = null)
+        public void BroadcastMessageAsync(object message, Type? typeHint = null)
             => Parallel.ForEach(Clients, async context => await base.SendMessageAsync(message, typeHint, context));
 
         /// <summary>
@@ -158,9 +160,10 @@ namespace Woof.WebSocket {
         /// </summary>
         /// <returns>Task completed when receiving loop is started.</returns>
         private async Task OnClientConnectedAsync() {
+            if (Listener is null || CTS is null) return;
             var httpListenerContext = await Listener.GetContextAsync();
             if (httpListenerContext.Request.IsWebSocketRequest) {
-                HttpListenerWebSocketContext httpListenerWebSocketContext = null;
+                HttpListenerWebSocketContext httpListenerWebSocketContext;
                 httpListenerWebSocketContext = await httpListenerContext.AcceptWebSocketAsync(Codec.SubProtocol);
                 var context = new WebSocketContext(httpListenerWebSocketContext);
                 if (context.IsOpen) {
@@ -180,8 +183,10 @@ namespace Woof.WebSocket {
         private async Task OnClientDisconnectedAsync(WebSocketContext context) {
             ClientDisconnecting?.Invoke(this, new WebSocketEventArgs(context));
             SessionProvider.CloseSession(context);
-            await context.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, null, CTS.Token);
-            await context.CloseAsync(WebSocketCloseStatus.NormalClosure, null, CTS.Token);
+            if (CTS != null) {
+                await context.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, null, CTS.Token);
+                await context.CloseAsync(WebSocketCloseStatus.NormalClosure, null, CTS.Token);
+            }
             context.Dispose();
             Clients.Remove(context);
         }
@@ -210,7 +215,7 @@ namespace Woof.WebSocket {
         /// <summary>
         /// A <see cref="HttpListener"/> used to listen for incomming connections.
         /// </summary>
-        private HttpListener Listener;
+        private HttpListener? Listener;
 
         #endregion
 

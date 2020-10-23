@@ -15,9 +15,9 @@ namespace Woof.WebSocket {
         /// <param name="instance">Message instance.</param>
         /// <param name="typeHint">Type hint.</param>
         /// <returns>Type context.</returns>
-        public MessageTypeContext GetContext(object instance, Type typeHint = null) {
+        public MessageTypeContext GetContext(object? instance, Type? typeHint = null) {
             if (instance is null && typeHint is null) throw new ArgumentNullException();
-            var type = typeHint ?? instance.GetType();
+            var type = typeHint ?? instance?.GetType();
             return Values.First(i => i.MessageType == type);
         }
 
