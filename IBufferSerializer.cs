@@ -35,10 +35,10 @@ namespace Woof.WebSocket {
         /// <summary>
         /// Deserializes a message from a buffer.
         /// </summary>
-        /// <param name="type">Message type.</param>
+        /// <param name="typeHint">Message type.</param>
         /// <param name="source">Buffer.</param>
         /// <returns>Message.</returns>
-        public object? Deserialize(Type type, ArraySegment<byte> source);
+        public object? Deserialize(Type? typeHint, ArraySegment<byte> source);
 
     }
 

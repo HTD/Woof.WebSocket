@@ -25,7 +25,7 @@ namespace Woof.WebSocket {
         /// <param name="type">Message type.</param>
         /// <param name="source">Buffer.</param>
         /// <returns>Message.</returns>
-        public object Deserialize(Type type, ArraySegment<byte> source)
+        public object Deserialize(Type? type, ArraySegment<byte> source)
             => ProtoBuf.Serializer.NonGeneric.Deserialize(type, (ReadOnlyMemory<byte>)source);
 
         /// <summary>
