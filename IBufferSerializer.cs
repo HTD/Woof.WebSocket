@@ -14,7 +14,7 @@ namespace Woof.WebSocket {
         /// <param name="message">Message.</param>
         /// <param name="typeHint">Type hint.</param>
         /// <returns>Buffer.</returns>
-        public ArraySegment<byte> Serialize(object message, Type? typeHint = null);
+        public ArraySegment<byte> Serialize(object? message, Type? typeHint = null);
 
         /// <summary>
         /// Serializes a message to a buffer.
@@ -22,7 +22,7 @@ namespace Woof.WebSocket {
         /// <typeparam name="TMessage">Message type.</typeparam>
         /// <param name="message">Message.</param>
         /// <returns>Buffer.</returns>
-        public ArraySegment<byte> Serialize<TMessage>(TMessage message);
+        public ArraySegment<byte> Serialize<TMessage>(TMessage? message) where TMessage : class;
 
         /// <summary>
         /// Deserializes a message from a buffer.
@@ -30,7 +30,7 @@ namespace Woof.WebSocket {
         /// <typeparam name="TMessage">Message type.</typeparam>
         /// <param name="source">Buffer.</param>
         /// <returns>Message.</returns>
-        public TMessage Deserialize<TMessage>(ArraySegment<byte> source);
+        public TMessage? Deserialize<TMessage>(ArraySegment<byte> source) where TMessage : class;
 
         /// <summary>
         /// Deserializes a message from a buffer.
@@ -38,7 +38,7 @@ namespace Woof.WebSocket {
         /// <param name="type">Message type.</param>
         /// <param name="source">Buffer.</param>
         /// <returns>Message.</returns>
-        public object Deserialize(Type type, ArraySegment<byte> source);
+        public object? Deserialize(Type type, ArraySegment<byte> source);
 
     }
 

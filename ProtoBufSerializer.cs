@@ -16,7 +16,7 @@ namespace Woof.WebSocket {
         /// <typeparam name="TMessage">Message type.</typeparam>
         /// <param name="source">Buffer.</param>
         /// <returns>Message.</returns>
-        public TMessage Deserialize<TMessage>(ArraySegment<byte> source)
+        public TMessage Deserialize<TMessage>(ArraySegment<byte> source) where TMessage : class
             => ProtoBuf.Serializer.Deserialize<TMessage>((ReadOnlyMemory<byte>)source);
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace Woof.WebSocket {
         /// <typeparam name="TMessage">Message type.</typeparam>
         /// <param name="message">Message.</param>
         /// <returns>Buffer.</returns>
-        public ArraySegment<byte> Serialize<TMessage>(TMessage message) {
+        public ArraySegment<byte> Serialize<TMessage>(TMessage? message) where TMessage : class {
             using var targetStream = new MemoryStream();
             ProtoBuf.Serializer.Serialize(targetStream, message);
             targetStream.TryGetBuffer(out var buffer);

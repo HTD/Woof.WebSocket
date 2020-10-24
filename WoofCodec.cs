@@ -76,6 +76,7 @@ namespace Woof.WebSocket {
             if (receiveResult.Count < metaLength)
                 return new DecodeResult(new InvalidOperationException(EHeaderIncomplete));
             var metaData = Serializer.Deserialize<MessageMetadata>(metaDataBuffer);
+            if (metaData is null) return new DecodeResult(new NullReferenceException(EMissingMetadata), default);
             if (!MessageTypes.ContainsKey(metaData.TypeId))
                 return new DecodeResult(new InvalidOperationException(EUnknownType), metaData.Id);
             if (limit >= 0 && metaData.PayloadLength > limit)
@@ -180,6 +181,7 @@ namespace Woof.WebSocket {
 
         private const string EInvalidType = "Invalid message type, binary expected";
         private const string EHeaderIncomplete = "Header incomplete";
+        private const string EMissingMetadata = "Missing message metadata";
         private const string EUnknownType = "Uknown message type";
         private const string ELengthExceeded = "Message length exceeds {0}";
         private const string EMessageIncomplete = "Message data incomplete";
