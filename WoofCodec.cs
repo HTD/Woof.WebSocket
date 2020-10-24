@@ -57,7 +57,7 @@ namespace Woof.WebSocket {
         /// <param name="token">Cancellation token.</param>
         /// <param name="limit">Optional message length limit, applied if positive value provided.</param>
         /// <returns>Task returning decoded message with the identifier.</returns>
-        public override async Task<DecodeResult> DecodeMessageAsync(WebSocketContext context, CancellationToken token, int limit = default) {
+        public override async Task<DecodeResult?> DecodeMessageAsync(WebSocketContext context, CancellationToken token, int limit = default) {
             var metaLengthBuffer = new ArraySegment<byte>(new byte[1]);
             var receiveResult = await context.ReceiveAsync(metaLengthBuffer, token);
             if (receiveResult.MessageType == WebSocketMessageType.Close)

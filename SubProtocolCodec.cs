@@ -50,7 +50,7 @@ namespace Woof.WebSocket {
         /// <param name="token">Cancellation token.</param>
         /// <param name="limit">Optional message length limit, applied if positive value provided.</param>
         /// <returns>Task returning decoded message with the identifier.</returns>
-        public abstract Task<DecodeResult> DecodeMessageAsync(WebSocketContext context, CancellationToken token, int limit = -1);
+        public abstract Task<DecodeResult?> DecodeMessageAsync(WebSocketContext context, CancellationToken token, int limit = -1);
 
         /// <summary>
         /// Encodes the message and sends it to the WebSocket context.
