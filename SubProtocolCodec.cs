@@ -26,7 +26,7 @@ namespace Woof.WebSocket {
         /// <summary>
         /// Gets the subprotocol name.
         /// </summary>
-        public abstract string SubProtocol { get; }
+        public abstract string? SubProtocol { get; }
 
         /// <summary>
         /// Gets the new unique message identifier.
