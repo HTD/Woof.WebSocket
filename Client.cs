@@ -13,6 +13,11 @@ namespace Woof.WebSocket {
         #region Public API
 
         /// <summary>
+        /// Gets or sets the operation timeout.
+        /// </summary>
+        public TimeSpan Timeout { get; set; } = TimeSpan.FromSeconds(2);
+
+        /// <summary>
         /// Starts the client conection.
         /// </summary>
         /// <returns>Task completed when initialized and the receiving task is started.</returns>
@@ -21,13 +26,17 @@ namespace Woof.WebSocket {
             State = ServiceState.Starting;
             OnStateChanged(State);
             CTS = new CancellationTokenSource();
+            using var timeoutCTS = new CancellationTokenSource(Timeout);
+            using var linkedCTS = CancellationTokenSource.CreateLinkedTokenSource(CTS.Token, timeoutCTS.Token);
             var clientWebSocket = new ClientWebSocket();
             Context = new WebSocketContext(clientWebSocket);
             if (Codec.SubProtocol != null)
                 clientWebSocket.Options.AddSubProtocol(Codec.SubProtocol);
             try {
-                await clientWebSocket.ConnectAsync(EndPointUri, CTS.Token);
-                await StartReceiveAsync(Context, CTS.Token, OnCloseReceivedAsync);
+                IsConnected = false;
+                await clientWebSocket.ConnectAsync(EndPointUri, linkedCTS.Token);
+                IsConnected = true;
+                await StartReceiveAsync(Context, linkedCTS.Token, OnCloseReceivedAsync);
             } catch {
                 await StopAsync();
                 throw;
@@ -43,13 +52,14 @@ namespace Woof.WebSocket {
             State = ServiceState.Stopping;
             OnStateChanged(State);
             try {
-                if (Context != null && CTS != null) {
-                    CTS.CancelAfter(TimeSpan.FromSeconds(2));
+                if (Context != null && CTS != null && IsConnected) {
+                    CTS.CancelAfter(Timeout);
                     await Context.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, null, CTS.Token);
                     await Context.CloseAsync(WebSocketCloseStatus.NormalClosure, null, CTS.Token);
                 }
             } catch (Exception) { }
             finally {
+                IsConnected = false;
                 Context?.Dispose();
                 Context = null;
                 CTS?.Dispose();
@@ -126,6 +136,8 @@ namespace Woof.WebSocket {
         /// WebSocket context used to exchange binary data with the server.
         /// </summary>
         WebSocketContext? Context;
+
+        bool IsConnected;
 
         #endregion
     
