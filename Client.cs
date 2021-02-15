@@ -18,6 +18,11 @@ namespace Woof.WebSocket {
         public TimeSpan Timeout { get; set; } = TimeSpan.FromSeconds(2);
 
         /// <summary>
+        /// Gets or sets the keep alive interval value for the <see cref="ClientWebSocket"/>. Default 30 seconds.
+        /// </summary>
+        public TimeSpan KeepAliveInterval { get; set; } = TimeSpan.FromSeconds(30);
+
+        /// <summary>
         /// Starts the client conection.
         /// </summary>
         /// <returns>Task completed when initialized and the receiving task is started.</returns>
@@ -29,6 +34,7 @@ namespace Woof.WebSocket {
             using var timeoutCTS = new CancellationTokenSource(Timeout);
             using var linkedCTS = CancellationTokenSource.CreateLinkedTokenSource(CTS.Token, timeoutCTS.Token);
             var clientWebSocket = new ClientWebSocket();
+            clientWebSocket.Options.KeepAliveInterval = KeepAliveInterval;
             Context = new WebSocketContext(clientWebSocket);
             if (Codec.SubProtocol != null)
                 clientWebSocket.Options.AddSubProtocol(Codec.SubProtocol);
