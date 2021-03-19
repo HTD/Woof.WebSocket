@@ -139,7 +139,7 @@ namespace Woof.WebSocket {
                     if (decodeResult.IsCloseFrame) break;
                     if (RequestsIncomplete.TryRemoveResponseSynchronizer(decodeResult.MessageId, out var responseSynchronizer) && responseSynchronizer != null) {
                         responseSynchronizer.Message = decodeResult.Message;
-                        responseSynchronizer.Semaphore.Release();
+                        if (responseSynchronizer.Semaphore != null && responseSynchronizer.Semaphore.CurrentCount < 1) responseSynchronizer.Semaphore.Release();
                     }
                     else if (decodeResult.TypeContext?.IsError == true && decodeResult.MessageId == default) {
                         RequestsIncomplete.Dispose(); // emergency release of incomplete requests on unmatched server error messages

@@ -279,7 +279,7 @@ namespace Woof.WebSocket.Test.Client {
         public async Task MessageTimeoutTestAsync() {
             DescribeTest("Message timeout");
             var timeOutCount = 0;
-            await Client.IntroduceLagAsync(TimeSpan.FromSeconds(2));
+            await Client.IntroduceLagAsync(TimeSpan.FromSeconds(2.5));
             await Task.Delay(TimeSpan.FromSeconds(5));
             try {
                 await Client.PingAsync();

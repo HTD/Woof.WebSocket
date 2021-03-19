@@ -9,7 +9,7 @@ WOOF subprotocol is based on Google Protocol Buffers to serialize data and fixed
     <Copyright>(c)2020 by CodeDog Ltd</Copyright>
     <PackageProjectUrl>https://github.com/HTD/Woof.WebSocket</PackageProjectUrl>
     <PackageTags>WebSocket</PackageTags>
-    <PackageReleaseNotes>CHANGE: Added KeepAliveInterval property for the Client.</PackageReleaseNotes>
+    <PackageReleaseNotes>Operations now time out properly, unknown messages don't break anything, but trigger the exception event.</PackageReleaseNotes>
     <Authors>Adam Łyskawa</Authors>
     <Company>CodeDog Ltd</Company>
     <PackageLicenseExpression></PackageLicenseExpression>
@@ -17,7 +17,7 @@ WOOF subprotocol is based on Google Protocol Buffers to serialize data and fixed
     <Product>Woof.WebSocket</Product>
     <PackageId>Woof.WebSocket</PackageId>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>1.1.9</Version>
+    <Version>1.2.0</Version>
     <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
@@ -55,7 +55,7 @@ WOOF subprotocol is based on Google Protocol Buffers to serialize data and fixed
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="protobuf-net" Version="3.0.73" />
+    <PackageReference Include="protobuf-net" Version="3.0.101" />
   </ItemGroup>
 
 </Project>
