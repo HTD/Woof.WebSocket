@@ -10,6 +10,10 @@ namespace Woof.WebSocket.Test.Server {
     /// </summary>
     class TestServer : Server<WoofCodec> {
 
+        private int IgnoreMessagesCount { get; set; }
+
+        private TimeSpan LagTime { get; set; }
+
         /// <summary>
         /// Initializes the test server instance.
         /// </summary>
@@ -19,6 +23,15 @@ namespace Woof.WebSocket.Test.Server {
             Codec.LoadMessageTypes(); // IMPORTANT: IT MUSTN'T BE CALLED UNLESS AT LEAST ONE API ASSEMBLY MEMBER WAS NOT TOUCHED!
         }
 
+        ///// <summary>
+        ///// Sends a message that the client should not be able to decode.
+        ///// Send it to test how would client behave.
+        ///// </summary>
+        ///// <param name="context">WebSocket context.</param>
+        ///// <returns>Task completed when the message is sent.</returns>
+        //public async Task SendUnexpectedAsync(WebSocketContext context, int typeId, ) => 
+        //    await Codec.SendEncodedAsync(context, CancellationToken, new MessageTypeContext(666, typeof(object)), Guid.NewGuid().ToByteArray());
+
         /// <summary>
         /// Handles MessageReceived events.<br/>
         /// Note that since the function is "async void" it should not throw because such exceptions can't be caught.
@@ -26,6 +39,11 @@ namespace Woof.WebSocket.Test.Server {
         /// <param name="decodeResult">Message receive result.</param>
         /// <param name="context">WebSocket (client) context.</param>
         protected override async void OnMessageReceived(DecodeResult decodeResult, WebSocketContext context) {
+            if (IgnoreMessagesCount > 0) {
+                IgnoreMessagesCount--;
+                return;
+            }
+            if (LagTime > TimeSpan.Zero) await Task.Delay(LagTime);
             if (decodeResult.IsUnauthorized) {
                 await SendMessageAsync(new AccessDeniedResponse(), context, decodeResult.MessageId);
                 return;
@@ -58,10 +76,26 @@ namespace Woof.WebSocket.Test.Server {
                 case TimeSubscribeRequest subscribeRequest:
                     await AsyncLoop.FromIterationAsync(async () => {
                         var boxedMsg = new TimeNotification { Time = DateTime.Now };
+                        
                         await SendMessageAsync(boxedMsg, typeHint: null, context);
                         await Task.Delay(subscribeRequest.Period);
                     }, CancellationToken, OnReceiveException, () => context.IsOpen);
                     break;
+                case TestUnexpectedRequest testUnexpectedRequest:
+                    await Codec.SendEncodedAsync(context, CancellationToken, new MessageTypeContext(testUnexpectedRequest.TypeId, typeof(object)), testUnexpectedRequest.Data);
+                    await SendMessageAsync(new TestUnexpectedResponse { TypeId = testUnexpectedRequest.TypeId, Data = testUnexpectedRequest.Data }, context, decodeResult.MessageId);
+                    break;
+                case IgnoreMessagesRequest ignoreMessagesRequest:
+                    IgnoreMessagesCount = ignoreMessagesRequest.Number;
+                    break;
+                case IntroduceLagRequest introduceLagRequest:
+                    LagTime = introduceLagRequest.Time;
+                    break;
+                case RestartRequest restartRequest:
+                    await StopAsync();
+                    await StartAsync();
+                    break;
+
             }
         }
 

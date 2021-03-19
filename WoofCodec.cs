@@ -77,8 +77,14 @@ namespace Woof.WebSocket {
                 return new DecodeResult(new InvalidOperationException(EHeaderIncomplete));
             var metaData = Serializer.Deserialize<MessageMetadata>(metaDataBuffer);
             if (metaData is null) return new DecodeResult(new NullReferenceException(EMissingMetadata), default);
-            if (!MessageTypes.ContainsKey(metaData.TypeId))
-                return new DecodeResult(new InvalidOperationException(EUnknownType), metaData.Id);
+            if (!MessageTypes.ContainsKey(metaData.TypeId)) { // we do not know the type, but we know the length so we should read it anyway!
+                var rawData = new ArraySegment<byte>(new byte[metaData.PayloadLength]);
+                await context.ReceiveAsync(rawData, token);
+                var exception = new InvalidOperationException(EUnknownType);
+                exception.Data.Add("TypeId", metaData.TypeId);
+                exception.Data.Add("RawData", rawData);
+                return new DecodeResult(exception, metaData.Id);
+            }
             if (limit >= 0 && metaData.PayloadLength > limit)
                 return new DecodeResult(new InvalidOperationException(String.Format(ELengthExceeded, nameof(limit))), metaData.Id);
             var typeContext = MessageTypes[metaData.TypeId];
@@ -116,11 +122,11 @@ namespace Woof.WebSocket {
         /// <param name="typeHint">Type hint.</param>
         /// <param name="id">Optional message identifier, if not set - new unique identifier will be used.</param>
         /// <returns>Task completed when the message is sent.</returns>
-        public override async Task EncodeMessageAsync(WebSocketContext context, CancellationToken token, object message, Type? typeHint = null, Guid id = default) {
+        public override async Task SendEncodedAsync(WebSocketContext context, CancellationToken token, object message, Type? typeHint = null, Guid id = default) {
             if (!context.IsOpen) return;
             var typeContext = MessageTypes.GetContext(message, typeHint);
             var messageBuffer = Serializer.Serialize(message, typeHint);
-            await EncodeMessageAsync(context, token, typeContext, messageBuffer, id);
+            await SendEncodedAsync(context, token, typeContext, messageBuffer, id);
         }
 
         /// <summary>
@@ -132,11 +138,11 @@ namespace Woof.WebSocket {
         /// <param name="message">Message to send.</param>
         /// <param name="id">Optional message identifier, if not set - new unique identifier will be used.</param>
         /// <returns>Task completed when the message is sent.</returns>
-        public override async Task EncodeMessageAsync<TMessage>(WebSocketContext context, CancellationToken token, TMessage message, Guid id = default) {
+        public override async Task SendEncodedAsync<TMessage>(WebSocketContext context, CancellationToken token, TMessage message, Guid id = default) {
             if (!context.IsOpen) return;
             var typeContext = MessageTypes.GetContext<TMessage>();
             var messageBuffer = Serializer.Serialize(message);
-            await EncodeMessageAsync(context, token, typeContext, messageBuffer, id);
+            await SendEncodedAsync(context, token, typeContext, messageBuffer, id);
         }
 
         /// <summary>
@@ -148,7 +154,7 @@ namespace Woof.WebSocket {
         /// <param name="buffer">A buffer with the message already encoded.</param>
         /// <param name="id">Optional message identifier, if not set - new unique identifier will be used.</param>
         /// <returns>Task completed when the message is sent.</returns>
-        private async Task EncodeMessageAsync(WebSocketContext context, CancellationToken token, MessageTypeContext typeContext, ArraySegment<byte> buffer, Guid id = default) {
+        public async Task SendEncodedAsync(WebSocketContext context, CancellationToken token, MessageTypeContext typeContext, ArraySegment<byte> buffer, Guid id = default) {
             var isPayloadPresent = buffer.Count > 0;
             var key = typeContext.IsSigned ? State.SessionProvider.GetKey(context) : null;
             var metadata =

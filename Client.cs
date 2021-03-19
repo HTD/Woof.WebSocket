@@ -103,7 +103,7 @@ namespace Woof.WebSocket {
         /// <param name="request">Request message.</param>
         /// <returns>Task returning the response message.</returns>
         public async Task<object?> SendAndReceiveAsync(object request)
-            => Context != null ? await SendAndReceiveAsync(request, Context) : null;
+            => Context != null ? await SendAndReceiveAsync(request, Context, Timeout) : null;
 
         /// <summary>
         /// Sends a message to the server context and awaits until the response of the specified type is received.
@@ -114,7 +114,7 @@ namespace Woof.WebSocket {
         /// <returns>Task returning the response message.</returns>
         public async Task<TResponse> SendAndReceiveAsync<TRequest, TResponse>(TRequest request) {
             if (Context is null) throw new NullReferenceException("There is no context for that request. The Client is not started.");
-            return await SendAndReceiveAsync<TRequest, TResponse>(request, Context);
+            return await SendAndReceiveAsync<TRequest, TResponse>(request, Context, Timeout);
         }
 
         /// <summary>

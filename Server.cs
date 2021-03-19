@@ -114,7 +114,7 @@ namespace Woof.WebSocket {
         /// <param name="request">Request message.</param>
         /// <param name="context">Target context.</param>
         /// <returns>Task returning the response message.</returns>
-        public new async Task<object?> SendAndReceiveAsync(object request, WebSocketContext context)
+        public async Task<object?> SendAndReceiveAsync(object request, WebSocketContext context)
             => await base.SendAndReceiveAsync(request, context);
 
         /// <summary>
@@ -125,7 +125,7 @@ namespace Woof.WebSocket {
         /// <param name="request">Request message.</param>
         /// <param name="context">Target context.</param>
         /// <returns>Task returning the response message.</returns>
-        public new async Task<TResponse> SendAndReceiveAsync<TRequest, TResponse>(TRequest request, WebSocketContext context)
+        public async Task<TResponse> SendAndReceiveAsync<TRequest, TResponse>(TRequest request, WebSocketContext context)
             => await base.SendAndReceiveAsync<TRequest, TResponse>(request, context);
 
         /// <summary>

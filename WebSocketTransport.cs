@@ -135,6 +135,7 @@ namespace Woof.WebSocket {
                 try {
                     var decodeResult = await Codec.DecodeMessageAsync(context, CancellationToken, MaxReceiveMessageSize);
                     if (decodeResult is null) continue; // we should ignore empty frames, shouldn't we?
+                    if (!decodeResult.IsSuccess && decodeResult.Exception?.Message != null) throw decodeResult.Exception;
                     if (decodeResult.IsCloseFrame) break;
                     if (RequestsIncomplete.TryRemoveResponseSynchronizer(decodeResult.MessageId, out var responseSynchronizer) && responseSynchronizer != null) {
                         responseSynchronizer.Message = decodeResult.Message;
@@ -187,7 +188,8 @@ namespace Woof.WebSocket {
         /// <param name="id">Optional message identifier, if not set - new unique identifier will be used.</param>
         /// <returns>Task completed when the sending is done.</returns>
         protected async Task SendMessageAsync(object message, Type? typeHint, WebSocketContext context, Guid id = default)
-            => await Codec.EncodeMessageAsync(context, CancellationToken, message, typeHint, id);
+            => await Codec.SendEncodedAsync(context, CancellationToken, message, typeHint, id);
+        
 
         /// <summary>
         /// Serializes and sends a message to the specified context.
@@ -198,21 +200,25 @@ namespace Woof.WebSocket {
         /// <param name="id">Optional message identifier, if not set - new unique identifier will be used.</param>
         /// <returns>Task completed when the sending is done.</returns>
         protected async Task SendMessageAsync<TMessage>(TMessage message, WebSocketContext context, Guid id = default)
-            => await Codec.EncodeMessageAsync(context, CancellationToken, message, id);
+            => await Codec.SendEncodedAsync(context, CancellationToken, message, id);
+
+        //protected async Task SendMessageAsync(ArraySegment<byte> rawMessage, MessageTypeContext typeContext, WebSocketContext context, Guid id = default)
+        //    => await Codec.SendEncodedAsync(context, CancellationToken, typeContext, rawMessage, id);
 
         /// <summary>
         /// Sends a message to the specified context and awaits until the response of the specified type is received.
         /// </summary>
         /// <param name="request">Request message.</param>
         /// <param name="context">Target context.</param>
+        /// <param name="timeout">Timeout value. Zero to for indefinite waiting.</param>
         /// <returns>Task returning the response message.</returns>
         /// <exception cref="UnexpectedMessageException">Thrown when a defined, but unexpected type message is received instead of expected one.</exception>
         /// <exception cref="TaskCanceledException">Thrown when the client or server operation is cancelled.</exception>
-        protected async Task<object?> SendAndReceiveAsync(object request, WebSocketContext context) {
+        protected async Task<object?> SendAndReceiveAsync(object request, WebSocketContext context, TimeSpan timeout = default) {
             var (id, synchronizer) = RequestsIncomplete.NewResponseSynchronizer;
             try {
                 await SendMessageAsync(request, typeHint: null, context, id);
-                await synchronizer.Semaphore.WaitAsync();
+                await synchronizer.Semaphore.WaitAsync(timeout);
                 return synchronizer.Message;
             }
             finally {
@@ -227,16 +233,18 @@ namespace Woof.WebSocket {
         /// <typeparam name="TResponse">Response message type.</typeparam>
         /// <param name="request">Request message.</param>
         /// <param name="context">Target context.</param>
+        /// <param name="timeout">Timeout value. Zero to for indefinite waiting.</param>
         /// <returns>Task returning the response message.</returns>
         /// <exception cref="UnexpectedMessageException">Thrown when a defined, but unexpected type message is received instead of expected one.</exception>
         /// <exception cref="TaskCanceledException">Thrown when the client or server operation is cancelled.</exception>
-        protected async Task<TResponse> SendAndReceiveAsync<TRequest, TResponse>(TRequest request, WebSocketContext context) {
+        protected async Task<TResponse> SendAndReceiveAsync<TRequest, TResponse>(TRequest request, WebSocketContext context, TimeSpan timeout = default) {
             var (id, synchronizer) = RequestsIncomplete.NewResponseSynchronizer;
             try {
                 await SendMessageAsync(request, context, id);
-                await synchronizer.Semaphore.WaitAsync();
+                await synchronizer.Semaphore.WaitAsync(timeout);
                 if (synchronizer.Message is TResponse response) return response;
-                else throw new UnexpectedMessageException(synchronizer.Message);
+                else if (synchronizer.Message is null) throw new TimeoutException();
+                    else throw new UnexpectedMessageException(synchronizer.Message);
             }
             finally {
                 synchronizer.Dispose();

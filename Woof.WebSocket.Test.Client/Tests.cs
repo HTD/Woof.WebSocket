@@ -50,6 +50,9 @@ namespace Woof.WebSocket.Test.Client {
             if (IsArgMatched(args, "ping")) await PingTestAsync();
             if (IsArgMatched(args, "ping-pong", out int iterations, 1024)) await PingPongTestAsync(iterations);
             if (IsArgMatched(args, "division")) await DivisionTestAsync();
+            if (IsArgMatched(args, "unexpected")) await UnexpectedMessageIdTestAsync();
+            if (IsArgMatched(args, "ignoring")) await MessageIgnoringTestAsync();
+            if (IsArgMatched(args, "timeout")) await MessageTimeoutTestAsync();
             if (IsArgMatched(args, "time", out double seconds, 1)) await TimeNotificationTestAsync(TimeSpan.FromSeconds(seconds));
         }
 
@@ -240,6 +243,52 @@ namespace Woof.WebSocket.Test.Client {
                 }
                 else DescribeResult(false);
             }
+        }
+
+        /// <summary>
+        /// Tests the unexpected message id behavior.
+        /// </summary>
+        /// <returns>Task completed when the test is completed.</returns>
+        public async Task UnexpectedMessageIdTestAsync() {
+            const int typeId = 666;
+            byte[] data = Guid.NewGuid().ToByteArray();
+            DescribeTest("Unexpected message id");
+            try {
+                var result = await Client.TestUnexpectedMessageTypeAsync(typeId, data);
+                DescribeResult(result.TypeId == typeId && result.Data.SequenceEqual(data));
+            }
+            catch (Exception x) {
+                DescribeResult(false, x.Message);
+            }
+        }
+
+        public async Task MessageIgnoringTestAsync() {
+            DescribeTest("Message ignoring");
+            await Client.IgnoreRequestsAsync(2);
+            var timeOutCount = 0;
+            for (var i = 0; i < 3; i++) {
+                try {
+                    await Client.PingAsync();
+                } catch (TimeoutException) {
+                    timeOutCount++;
+                }
+            }
+            DescribeResult(timeOutCount == 2);
+        }
+
+        public async Task MessageTimeoutTestAsync() {
+            DescribeTest("Message timeout");
+            var timeOutCount = 0;
+            await Client.IntroduceLagAsync(TimeSpan.FromSeconds(2));
+            await Task.Delay(TimeSpan.FromSeconds(5));
+            try {
+                await Client.PingAsync();
+            }
+            catch (TimeoutException) {
+                timeOutCount++;
+            }
+            await Client.IntroduceLagAsync(TimeSpan.FromSeconds(0));
+            DescribeResult(timeOutCount == 1);
         }
 
         #endregion

@@ -129,5 +129,46 @@ namespace Woof.WebSocket.Test.Api {
         public DateTime Time { get; set; }
 
     }
+
+    [Message(15), ProtoContract]
+    public class TestUnexpectedRequest {
+
+        [ProtoMember(1)]
+        public int TypeId { get; set; }
+
+        [ProtoMember(2)]
+        public byte[] Data { get; set; }
+
+    }
+
+    [Message(16), ProtoContract]
+    public class TestUnexpectedResponse {
+
+        [ProtoMember(1)]
+        public int TypeId { get; set; }
+
+        [ProtoMember(2)]
+        public byte[] Data { get; set; }
+
+    }
+
+    [Message(17), ProtoContract]
+    public class IgnoreMessagesRequest {
+
+        [ProtoMember(1)]
+        public int Number { get; set; }
+
+    }
+
+    [Message(18), ProtoContract]
+    public class IntroduceLagRequest {
+
+        [ProtoMember(1)]
+        public TimeSpan Time { get; set; }
+
+    }
+
+    [Message(19), ProtoContract]
+    public class RestartRequest { }
     
 }

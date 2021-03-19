@@ -16,6 +16,7 @@ namespace Woof.WebSocket.Test.Client {
         public TestClient() {
             EndPointUri = Api.Properties.EndPointUri;
             Codec.LoadMessageTypes();
+            Timeout = TimeSpan.FromSeconds(2);
         }
 
         /// <summary>
@@ -52,6 +53,13 @@ namespace Woof.WebSocket.Test.Client {
             => await SendAndReceiveAsync<PingRequest, PingResponse>(new PingRequest());
 
         /// <summary>
+        /// Ask the server to send a unexpected message type with specified type and raw binary data.
+        /// </summary>
+        /// <returns>Task returning cloned message data. Also, we should get the unexpected message and a decoding exception event.</returns>
+        public async Task<TestUnexpectedResponse> TestUnexpectedMessageTypeAsync(int typeId, byte[] data)
+            => await SendAndReceiveAsync<TestUnexpectedRequest, TestUnexpectedResponse>(new TestUnexpectedRequest { TypeId = typeId, Data = data });
+
+        /// <summary>
         /// Performs a test division of two decimal numbers.
         /// </summary>
         /// <param name="x">Divident.</param>
@@ -76,6 +84,15 @@ namespace Woof.WebSocket.Test.Client {
         /// <returns>Task completed as soon as the subscription message is sent.</returns>
         public async Task TimeSubscribeAsync(TimeSpan period = default)
             => await SendMessageAsync(new TimeSubscribeRequest { Period = period == default ? TimeSpan.FromSeconds(1) : period });
+
+        public async Task IgnoreRequestsAsync(int numberOfRequestsToIgnore)
+            => await SendMessageAsync(new IgnoreMessagesRequest { Number = numberOfRequestsToIgnore });
+
+        public async Task IntroduceLagAsync(TimeSpan time)
+            => await SendMessageAsync(new IntroduceLagRequest { Time = time });
+
+        public async Task RestartServerAsync()
+            => await SendMessageAsync(new RestartRequest());
 
     }
 
