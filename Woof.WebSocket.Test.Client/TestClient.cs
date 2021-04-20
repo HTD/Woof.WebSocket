@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Reflection;
 using System.Threading.Tasks;
+
+using Microsoft.Extensions.Configuration;
 
 using Woof.WebSocket.Test.Api;
 
@@ -14,7 +17,8 @@ namespace Woof.WebSocket.Test.Client {
         /// Initializes the test server instance.
         /// </summary>
         public TestClient() {
-            EndPointUri = Api.Properties.EndPointUri;
+            EndPointUri = new Uri(Config.Data.GetValue<string>("EndPointUri"));
+            Assembly.Load("Woof.WebSocket.Test.Api");
             Codec.LoadMessageTypes();
             Timeout = TimeSpan.FromSeconds(2);
         }
