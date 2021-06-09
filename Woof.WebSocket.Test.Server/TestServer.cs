@@ -27,15 +27,6 @@ namespace Woof.WebSocket.Test.Server {
             Codec.LoadMessageTypes(); // IMPORTANT: IT MUSTN'T BE CALLED UNLESS AT LEAST ONE API ASSEMBLY MEMBER WAS NOT TOUCHED!
         }
 
-        ///// <summary>
-        ///// Sends a message that the client should not be able to decode.
-        ///// Send it to test how would client behave.
-        ///// </summary>
-        ///// <param name="context">WebSocket context.</param>
-        ///// <returns>Task completed when the message is sent.</returns>
-        //public async Task SendUnexpectedAsync(WebSocketContext context, int typeId, ) => 
-        //    await Codec.SendEncodedAsync(context, CancellationToken, new MessageTypeContext(666, typeof(object)), Guid.NewGuid().ToByteArray());
-
         /// <summary>
         /// Handles MessageReceived events.<br/>
         /// Note that since the function is "async void" it should not throw because such exceptions can't be caught.
@@ -99,8 +90,8 @@ namespace Woof.WebSocket.Test.Server {
                     await StopAsync();
                     await StartAsync();
                     break;
-
             }
+        
         }
 
     }

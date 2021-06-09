@@ -1,3 +1,4 @@
 {
-    "EndPointUri": "ws://127.0.0.1:54445/"
+    //"EndPointUri": "ws://127.0.0.1:54445/",
+    "EndPointUri": "wss://ws-test.codedog.pl/"
 }

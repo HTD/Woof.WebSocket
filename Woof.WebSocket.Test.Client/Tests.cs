@@ -48,7 +48,7 @@ namespace Woof.WebSocket.Test.Client {
             if (Client.State != ServiceState.Started) return;
             if (IsArgMatched(args, "auth")) await AuthorizationTestAsync();
             if (IsArgMatched(args, "ping")) await PingTestAsync();
-            if (IsArgMatched(args, "ping-pong", out int iterations, 1024)) await PingPongTestAsync(iterations);
+            if (IsArgMatched(args, "ping-pong", out int iterations, 128)) await PingPongTestAsync(iterations);
             if (IsArgMatched(args, "division")) await DivisionTestAsync();
             if (IsArgMatched(args, "unexpected")) await UnexpectedMessageIdTestAsync();
             if (IsArgMatched(args, "ignoring")) await MessageIgnoringTestAsync();

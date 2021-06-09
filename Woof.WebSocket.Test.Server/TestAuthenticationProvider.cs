@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Woof.WebSocket.Test.Server {
@@ -14,7 +12,8 @@ namespace Woof.WebSocket.Test.Server {
         public async Task<byte[]> GetKeyAsync(byte[] apiKey) {
             var testApiKey = Convert.FromBase64String(TestApiKey);
             await Task.Delay(1);
-            if (apiKey.SequenceEqual(testApiKey)) return Convert.FromBase64String(TestApiSecret);
+            var isKeyEqual = apiKey.SequenceEqual(testApiKey);
+            if (isKeyEqual) return Convert.FromBase64String(TestApiSecret);
             return null;
         }
 
