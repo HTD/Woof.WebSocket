@@ -27,6 +27,9 @@ namespace Woof.WebSocket {
         /// </summary>
         /// <returns>Task completed when initialized and the receiving task is started.</returns>
         public async Task StartAsync() {
+            if (EndPointUri is null) throw new NullReferenceException($"{nameof(EndPointUri)} must be set before calling {nameof(StartAsync)}");
+            if (Codec.IsLoadingTypesRequired && !Codec.IsMessageTypesLoaded)
+                throw new InvalidOperationException("Message types for the codec are required but not loaded");
             if (CTS != null || Context != null) throw new InvalidOperationException("Client already started");
             State = ServiceState.Starting;
             OnStateChanged(State);
@@ -45,7 +48,9 @@ namespace Woof.WebSocket {
                 await StartReceiveAsync(Context, linkedCTS.Token, OnCloseReceivedAsync);
             } catch {
                 await StopAsync();
-                throw;
+                if (timeoutCTS.IsCancellationRequested)
+                    throw new TimeoutException();
+                else throw;
             }
         }
 
@@ -121,7 +126,10 @@ namespace Woof.WebSocket {
         /// Disposes all resources used by the client.
         /// Closes the connection if not already closed.
         /// </summary>
-        public void Dispose() => StopAsync().Wait();
+        public void Dispose() {
+            StopAsync().Wait();
+            GC.SuppressFinalize(this);
+        }
 
         #endregion
 

@@ -35,7 +35,7 @@ namespace Woof.WebSocket {
         /// <param name="typeHint">Type hint.</param>
         /// <returns>Buffer.</returns>
         public ArraySegment<byte> Serialize(object? message, Type? typeHint = null) {
-            if (message is null && typeHint is null) throw new ArgumentNullException();
+            if (message is null && typeHint is null) throw new ArgumentNullException(nameof(typeHint));
             using var targetStream = new MemoryStream();
             var messageType = typeHint ?? message?.GetType();
             if (messageType != null)

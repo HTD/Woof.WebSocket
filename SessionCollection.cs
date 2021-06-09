@@ -26,6 +26,7 @@ namespace Woof.WebSocket {
             foreach (var session in Values)
                 if (session is IDisposable disposableSession) disposableSession.Dispose();
             Clear();
+            GC.SuppressFinalize(this);
         }
 
     }

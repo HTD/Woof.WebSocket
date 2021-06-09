@@ -53,6 +53,7 @@ namespace Woof.WebSocket {
         public void Dispose() {
             foreach (var i in Values) i.Dispose();
             Clear();
+            GC.SuppressFinalize(this);
         }
 
     }

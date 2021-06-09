@@ -45,6 +45,7 @@ namespace Woof.WebSocket {
             }
             finally { // however:
                 IsDisposed = true;
+                GC.SuppressFinalize(this);
             }
         }
 

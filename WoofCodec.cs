@@ -32,6 +32,11 @@ namespace Woof.WebSocket {
         public override string SubProtocol => Name;
 
         /// <summary>
+        /// Gets always true, because Woof subprotocol codec requires message types defined.
+        /// </summary>
+        public override bool IsLoadingTypesRequired => true;
+
+        /// <summary>
         /// Gets the new unique message id.
         /// </summary>
         public override Guid NewId => Guid.NewGuid();
@@ -39,13 +44,16 @@ namespace Woof.WebSocket {
         /// <summary>
         /// Loads message types from the current application domain assemblies.
         /// </summary>
-        public override void LoadMessageTypes() {
+        /// <param name="assemblyString">Optional assembly name to load.</param>
+        public override void LoadMessageTypes(string? assemblyString = null) {
+            if (assemblyString != null) Assembly.Load(assemblyString);
             foreach (var t in
                 AppDomain.CurrentDomain.GetAssemblies()
                 .Where(a => !a.IsDynamic)
                 .SelectMany(a => a.GetTypes())
                 .Where(t => t.GetCustomAttribute<MessageAttribute>() != null)
                 .Select(t => new { Type = t, Meta = t.GetCustomAttribute<MessageAttribute>() })) {
+                if (t.Meta is null) continue;
                 MessageTypes.Add(t.Meta.MessageTypeId, new MessageTypeContext(t.Meta.MessageTypeId, t.Type, t.Meta.IsSigned, t.Meta.IsSignInRequest, t.Meta.IsError));
             }
         }
@@ -66,6 +74,7 @@ namespace Woof.WebSocket {
                 return new DecodeResult(new InvalidOperationException(EInvalidType));
             if (receiveResult.EndOfMessage || receiveResult.Count < 1)
                 return new DecodeResult(new InvalidOperationException(EHeaderIncomplete));
+            if (metaLengthBuffer.Array is null) throw new NullReferenceException();
             var metaLength = metaLengthBuffer.Array[0];
             var metaDataBuffer = new ArraySegment<byte>(new byte[metaLength]);
             receiveResult = await context.ReceiveAsync(metaDataBuffer, token);
@@ -172,6 +181,7 @@ namespace Woof.WebSocket {
                 };
             var metaDataBuffer = Serializer.Serialize(metadata);
             var metaSizeBuffer = new ArraySegment<byte>(new byte[1]);
+            if (metaSizeBuffer.Array is null) throw new NullReferenceException();
             metaSizeBuffer.Array[0] = (byte)metaDataBuffer.Count;
             var messageParts =
                 isPayloadPresent

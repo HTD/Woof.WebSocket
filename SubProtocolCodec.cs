@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,6 +31,16 @@ namespace Woof.WebSocket {
         public abstract string? SubProtocol { get; }
 
         /// <summary>
+        /// Gets a value indicating that loading of message types is required.
+        /// </summary>
+        public virtual bool IsLoadingTypesRequired { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether message types are loaded.
+        /// </summary>
+        public bool IsMessageTypesLoaded => MessageTypes.Any();
+
+        /// <summary>
         /// Gets the new unique message identifier.
         /// </summary>
         public abstract Guid NewId { get; }
@@ -42,7 +53,8 @@ namespace Woof.WebSocket {
         /// <summary>
         /// Loads message types if applicable.
         /// </summary>
-        public virtual void LoadMessageTypes() { }
+        /// <param name="assemblyString">Optional assembly name to load.</param>
+        public virtual void LoadMessageTypes(string? assemblyString = null) { }
 
         /// <summary>
         /// Reads and decodes a message from the WebSocket context.
@@ -82,7 +94,7 @@ namespace Woof.WebSocket {
         /// <param name="key">Message signing key.</param>
         /// <returns>Message signature (20 bytes, 160 bits).</returns>
         public virtual byte[] Sign(ArraySegment<byte> message, byte[] key) {
-            using var hmac = new HMACSHA256(key); return hmac.ComputeHash(message.Array, message.Offset, message.Count);
+            using var hmac = new HMACSHA256(key); return hmac.ComputeHash(message.Array ?? throw new NullReferenceException(), message.Offset, message.Count);
         }
 
         /// <summary>
@@ -101,6 +113,7 @@ namespace Woof.WebSocket {
         /// <returns>64 bytes (128 bits).</returns>
         public virtual byte[] GetKey() {
             using var hmac = HMACSHA256.Create("HMACSHA256");
+            if (hmac is null) throw new NullReferenceException();
             return hmac.Key;
         }
 

@@ -74,6 +74,7 @@ namespace Woof.WebSocket {
         /// <param name="arraySegment">Buffer.</param>
         /// <param name="limit">Optional capacity limit.</param>
         public DynamicBuffer(ArraySegment<byte> arraySegment, int limit = default) {
+            if (arraySegment.Array is null) throw new NullReferenceException("Array segment provided must have non-null Array");
             Array = arraySegment.Array;
             Offset = arraySegment.Offset;
             Count = arraySegment.Count;

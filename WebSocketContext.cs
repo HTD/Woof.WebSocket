@@ -24,7 +24,7 @@ namespace Woof.WebSocket {
         /// <summary>
         /// Allows the remote endpoint to describe the reason why the connection was closed.
         /// </summary>
-        public string CloseStatusDescription => Socket.CloseStatusDescription;
+        public string? CloseStatusDescription => Socket.CloseStatusDescription;
 
         /// <summary>
         /// Indicates the reason why the remote endpoint initiated the close handshake.
@@ -39,7 +39,7 @@ namespace Woof.WebSocket {
         /// <summary>
         /// The subprotocol that was negotiated during the opening handshake.
         /// </summary>
-        public string SubProtocol => Socket.SubProtocol;
+        public string? SubProtocol => Socket.SubProtocol;
 
         /// <summary>
         /// Cretes the context from the <see cref="System.Net.WebSockets.WebSocket"/>.
@@ -84,7 +84,7 @@ namespace Woof.WebSocket {
         /// <param name="cancellationToken">The token that can be used to propagate notification that operations should be canceled.</param>
         /// <returns>Task completed when the CLOSE frame is sent.</returns>
         public async Task CloseOutputAsync(WebSocketCloseStatus closeStatus, string? statusDescription, CancellationToken cancellationToken) {
-            await Semaphore.WaitAsync();
+            await Semaphore.WaitAsync(cancellationToken);
             try {
                 
                 await Socket.CloseOutputAsync(closeStatus, statusDescription, cancellationToken);
@@ -111,7 +111,7 @@ namespace Woof.WebSocket {
         /// <param name="cancellationToken">The token that propagates the notification that operations should be canceled.</param>
         /// <returns>Task completed when the sending is done.</returns>
         public async Task SendAsync(ArraySegment<byte> buffer, WebSocketMessageType messageType, bool endOfMessage, CancellationToken cancellationToken) {
-            await Semaphore.WaitAsync(); 
+            await Semaphore.WaitAsync(cancellationToken); 
             try {    
                 await Socket.SendAsync(buffer, messageType, endOfMessage, cancellationToken);
             }
@@ -129,7 +129,7 @@ namespace Woof.WebSocket {
         /// <param name="cancellationToken">The token that propagates the notification that operations should be canceled.</param>
         /// <returns>Task completed when the sending is done.</returns>
         public async Task SendAsync(IEnumerable<ArraySegment<byte>> buffers, WebSocketMessageType messageType, CancellationToken cancellationToken) {
-            await Semaphore.WaitAsync();
+            await Semaphore.WaitAsync(cancellationToken);
             try {
                 var e = buffers.GetEnumerator();
                 var isLast = !e.MoveNext();
@@ -150,6 +150,7 @@ namespace Woof.WebSocket {
         public void Dispose() {
             Semaphore.Dispose();
             Socket.Dispose();
+            GC.SuppressFinalize(this);
         }
 
         #region Data fields

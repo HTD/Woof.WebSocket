@@ -1,4 +1,5 @@
-﻿using System.Runtime.Serialization;
+﻿using System;
+using System.Runtime.Serialization;
 
 namespace Woof.WebSocket {
 
@@ -44,8 +45,10 @@ namespace Woof.WebSocket {
         /// <typeparam name="TSession">Session type.</typeparam>
         /// <param name="context">WebSocket from the connected client. Or null for the client single session.</param>
         /// <returns>Session object.</returns>
+        /// <exception cref="NullReferenceException">Thrown when no context is provided for server.</exception>
         public TSession GetSession<TSession>(WebSocketContext? context = null) where TSession : ISession, new() {
             if (IdGenerator is null) return (TSession)(Session = new TSession()); // single session, started from client scenario.
+            if (context is null) throw new NullReferenceException("Context is required for server use");
             var sessionId = IdGenerator.GetId(context, out _);
             if (Sessions is null) Sessions = new SessionCollection();
             if (!Sessions.ContainsKey(sessionId)) {

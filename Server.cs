@@ -7,6 +7,7 @@ using System.Threading;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Data.SqlTypes;
+using System.Dynamic;
 
 namespace Woof.WebSocket {
 
@@ -44,7 +45,9 @@ namespace Woof.WebSocket {
         /// </summary>
         /// <returns>Task completed when the server is initialized and in listening state.</returns>
         public async Task StartAsync() {
-            if (EndPointUri is null) throw new NullReferenceException($"{nameof(EndPointUri)} should be set before calling {nameof(StartAsync)}");
+            if (EndPointUri is null) throw new NullReferenceException($"{nameof(EndPointUri)} must be set before calling {nameof(StartAsync)}");
+            if (Codec.IsLoadingTypesRequired && !Codec.IsMessageTypesLoaded)
+                throw new InvalidOperationException("Message types for the codec are required but not loaded");
             if (CTS != null || Listener != null || State == ServiceState.Started) throw new InvalidOperationException("Server already started");
             if (State == ServiceState.Starting) throw new InvalidOperationException("Server is starting");
             State = ServiceState.Starting;
@@ -64,7 +67,7 @@ namespace Woof.WebSocket {
         /// </summary>
         /// <returns>Task completed when all server tasks are stopped and all connections are closed.</returns>
         public async Task StopAsync() {
-            if (CTS is null || Listener is null) return;
+            if (CTS is null || Listener is null || State == ServiceState.Stopping) return;
             State = ServiceState.Stopping;
             OnStateChanged(State);
             CTS.CancelAfter(TimeSpan.FromSeconds(2));
@@ -147,7 +150,10 @@ namespace Woof.WebSocket {
         /// Disposes all resources used by the server.
         /// Closes all connections if not closed already.
         /// </summary>
-        public void Dispose() => StopAsync().Wait();
+        public void Dispose() {
+            StopAsync().Wait();
+            GC.SuppressFinalize(this);
+        }
 
         #endregion
 
@@ -164,7 +170,7 @@ namespace Woof.WebSocket {
             var httpListenerContext = await Listener.GetContextAsync();
             if (httpListenerContext.Request.IsWebSocketRequest) {
                 HttpListenerWebSocketContext httpListenerWebSocketContext;
-                httpListenerWebSocketContext = await httpListenerContext.AcceptWebSocketAsync(Codec.SubProtocol);
+                httpListenerWebSocketContext = await httpListenerContext.AcceptWebSocketAsync(Codec.SubProtocol ?? String.Empty);
                 var context = new WebSocketContext(httpListenerWebSocketContext);
                 if (context.IsOpen) {
                     SessionProvider.OpenSession(context);
