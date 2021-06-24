@@ -62,10 +62,10 @@ namespace Woof.WebSocket {
         /// Reads and decodes a message from the socket.
         /// </summary>
         /// <param name="context">Thread-safe WebSocket pack.</param>
-        /// <param name="token">Cancellation token.</param>
         /// <param name="limit">Optional message length limit, applied if positive value provided.</param>
+        /// <param name="token">Cancellation token.</param>
         /// <returns>Task returning decoded message with the identifier.</returns>
-        public override async Task<DecodeResult?> DecodeMessageAsync(WebSocketContext context, CancellationToken token, int limit = default) {
+        public override async Task<DecodeResult?> DecodeMessageAsync(WebSocketContext context, int limit = default, CancellationToken token = default) {
             var metaLengthBuffer = new ArraySegment<byte>(new byte[1]);
             var receiveResult = await context.ReceiveAsync(metaLengthBuffer, token);
             if (receiveResult.MessageType == WebSocketMessageType.Close)
@@ -99,11 +99,22 @@ namespace Woof.WebSocket {
             var typeContext = MessageTypes[metaData.TypeId];
             if (receiveResult.EndOfMessage)
                 return new DecodeResult(typeContext, Activator.CreateInstance(typeContext.MessageType), metaData.Id);
-            var messageBuffer = new ArraySegment<byte>(new byte[metaData.PayloadLength]);
-            receiveResult = await context.ReceiveAsync(messageBuffer, token);
-            if (receiveResult.Count < metaData.PayloadLength || !receiveResult.EndOfMessage)
+            var messageBuffer = new byte[metaData.PayloadLength];
+            var currentOffset = 0;
+            var currentLengthLeft = messageBuffer.Length;
+            ArraySegment<byte> messageSegment;
+            do {
+                messageSegment = new ArraySegment<byte>(messageBuffer, currentOffset, currentLengthLeft);
+                receiveResult = await context.ReceiveAsync(messageSegment, token);
+                currentOffset += receiveResult.Count;
+                currentLengthLeft -= receiveResult.Count;
+                if (receiveResult.MessageType == WebSocketMessageType.Close)
+                    return new DecodeResult(receiveResult);
+            } while (!receiveResult.EndOfMessage);
+            messageSegment = new(messageBuffer, 0, currentOffset);
+            if (messageSegment.Count < metaData.PayloadLength || !receiveResult.EndOfMessage)
                 return new DecodeResult(new InvalidOperationException(EMessageIncomplete), metaData.Id);
-            var message = Serializer.Deserialize(MessageTypes[metaData.TypeId].MessageType, messageBuffer);
+            var message = Serializer.Deserialize(MessageTypes[metaData.TypeId].MessageType, messageSegment);
             var isSignatureValid = false;
             var isSignInRequest = typeContext.IsSignInRequest || message is ISignInRequest;
             if (typeContext.IsSigned && metaData.Signature != null) {
@@ -115,7 +126,7 @@ namespace Woof.WebSocket {
                     )
                     : State.SessionProvider.GetKey(context);
                 if (key != null) {
-                    byte[] expected = Sign(messageBuffer, key);
+                    byte[] expected = Sign(messageSegment, key);
                     isSignatureValid = metaData.Signature.SequenceEqual(expected);
                 }
             }
@@ -126,16 +137,16 @@ namespace Woof.WebSocket {
         /// Encodes the message and sends it to the WebSocket context.
         /// </summary>
         /// <param name="context">WebSocket context.</param>
-        /// <param name="token">Cancellation token.</param>
         /// <param name="message">Message to send.</param>
         /// <param name="typeHint">Type hint.</param>
         /// <param name="id">Optional message identifier, if not set - new unique identifier will be used.</param>
+        /// <param name="token">Cancellation token.</param>
         /// <returns>Task completed when the message is sent.</returns>
-        public override async Task SendEncodedAsync(WebSocketContext context, CancellationToken token, object message, Type? typeHint = null, Guid id = default) {
+        public override async Task SendEncodedAsync(WebSocketContext context, object message, Type? typeHint = null, Guid id = default, CancellationToken token = default) {
             if (!context.IsOpen) return;
             var typeContext = MessageTypes.GetContext(message, typeHint);
             var messageBuffer = Serializer.Serialize(message, typeHint);
-            await SendEncodedAsync(context, token, typeContext, messageBuffer, id);
+            await SendEncodedAsync(context, typeContext, messageBuffer, id, token);
         }
 
         /// <summary>
@@ -143,27 +154,27 @@ namespace Woof.WebSocket {
         /// </summary>
         /// <typeparam name="TMessage">Message type.</typeparam>
         /// <param name="context">WebSocket context.</param>
-        /// <param name="token">Cancellation token.</param>
         /// <param name="message">Message to send.</param>
         /// <param name="id">Optional message identifier, if not set - new unique identifier will be used.</param>
+        /// <param name="token">Cancellation token.</param>
         /// <returns>Task completed when the message is sent.</returns>
-        public override async Task SendEncodedAsync<TMessage>(WebSocketContext context, CancellationToken token, TMessage message, Guid id = default) {
+        public override async Task SendEncodedAsync<TMessage>(WebSocketContext context, TMessage message, Guid id = default, CancellationToken token = default) {
             if (!context.IsOpen) return;
             var typeContext = MessageTypes.GetContext<TMessage>();
             var messageBuffer = Serializer.Serialize(message);
-            await SendEncodedAsync(context, token, typeContext, messageBuffer, id);
+            await SendEncodedAsync(context, typeContext, messageBuffer, id, token);
         }
 
         /// <summary>
         /// Encodes a serialized message and sends it to the WebSocket context.
         /// </summary>
         /// <param name="context">WebSocket context.</param>
-        /// <param name="token">Cancellation token.</param>
         /// <param name="typeContext">Type context.</param>
         /// <param name="buffer">A buffer with the message already encoded.</param>
         /// <param name="id">Optional message identifier, if not set - new unique identifier will be used.</param>
+        /// <param name="token">Cancellation token.</param>
         /// <returns>Task completed when the message is sent.</returns>
-        public async Task SendEncodedAsync(WebSocketContext context, CancellationToken token, MessageTypeContext typeContext, ArraySegment<byte> buffer, Guid id = default) {
+        public async Task SendEncodedAsync(WebSocketContext context, MessageTypeContext typeContext, ArraySegment<byte> buffer, Guid id = default, CancellationToken token = default) {
             var isPayloadPresent = buffer.Count > 0;
             var key = typeContext.IsSigned ? State.SessionProvider.GetKey(context) : null;
             var metadata =
@@ -182,7 +193,12 @@ namespace Woof.WebSocket {
             var metaDataBuffer = Serializer.Serialize(metadata);
             var metaSizeBuffer = new ArraySegment<byte>(new byte[1]);
             if (metaSizeBuffer.Array is null) throw new NullReferenceException();
+            if (metaDataBuffer.Count > 255) {
+                ;
+                throw new InvalidCastException();
+            }
             metaSizeBuffer.Array[0] = (byte)metaDataBuffer.Count;
+            
             var messageParts =
                 isPayloadPresent
                 ? new ArraySegment<byte>[] { metaSizeBuffer, metaDataBuffer, buffer }
