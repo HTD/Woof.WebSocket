@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>net5.0;netstandard2.0</TargetFrameworks>
-    <LangVersion>8.0</LangVersion>
+    <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <Description>WebSocket API base using fast and simple WOOF subprotocol.
 WOOF subprotocol is based on Google Protocol Buffers to serialize data and fixed size headers.</Description>
@@ -17,7 +17,7 @@ WOOF subprotocol is based on Google Protocol Buffers to serialize data and fixed
     <Product>Woof.WebSocket</Product>
     <PackageId>Woof.WebSocket</PackageId>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>1.2.1</Version>
+    <Version>5.0.0</Version>
     <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
@@ -28,7 +28,7 @@ WOOF subprotocol is based on Google Protocol Buffers to serialize data and fixed
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net5.0|AnyCPU'">
-    <NoWarn>1701;1702;CA1068</NoWarn>
+    <NoWarn>1701;1702</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
