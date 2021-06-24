@@ -117,13 +117,13 @@ namespace Woof.WebSocket {
         /// Converts to <see cref="ArraySegment{T}"/>.
         /// </summary>
         /// <param name="buffer">Buffer.</param>
-        public static implicit operator ArraySegment<byte>(DynamicBuffer buffer) => new ArraySegment<byte>(buffer.Array, buffer.Offset, buffer.Count);
+        public static implicit operator ArraySegment<byte>(DynamicBuffer buffer) => new(buffer.Array, buffer.Offset, buffer.Count);
 
         /// <summary>
         /// Converts from <see cref="ArraySegment{T}"/>.
         /// </summary>
         /// <param name="arraySegment"><see cref="ArraySegment{T}"/>.</param>
-        public static implicit operator DynamicBuffer(ArraySegment<byte> arraySegment) => new DynamicBuffer(arraySegment);
+        public static implicit operator DynamicBuffer(ArraySegment<byte> arraySegment) => new(arraySegment);
 
     }
 
