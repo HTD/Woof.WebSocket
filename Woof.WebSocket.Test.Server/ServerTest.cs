@@ -80,7 +80,7 @@ namespace Woof.WebSocket.Test.Server {
         /// <summary>
         /// <see cref="TestServer"/> instance.
         /// </summary>
-        static readonly TestServer Server = new TestServer();
+        static readonly TestServer Server = new();
 
     }
 

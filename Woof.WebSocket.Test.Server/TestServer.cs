@@ -74,10 +74,10 @@ namespace Woof.WebSocket.Test.Server {
                         
                         await SendMessageAsync(boxedMsg, typeHint: null, context);
                         await Task.Delay(subscribeRequest.Period);
-                    }, CancellationToken, OnReceiveException, () => context.IsOpen);
+                    }, OnReceiveException, () => context.IsOpen, false, CancellationToken);
                     break;
                 case TestUnexpectedRequest testUnexpectedRequest:
-                    await Codec.SendEncodedAsync(context, CancellationToken, new MessageTypeContext(testUnexpectedRequest.TypeId, typeof(object)), testUnexpectedRequest.Data);
+                    await Codec.SendEncodedAsync(context, new MessageTypeContext(testUnexpectedRequest.TypeId, typeof(object)), testUnexpectedRequest.Data, default, CancellationToken);
                     await SendMessageAsync(new TestUnexpectedResponse { TypeId = testUnexpectedRequest.TypeId, Data = testUnexpectedRequest.Data }, context, decodeResult.MessageId);
                     break;
                 case IgnoreMessagesRequest ignoreMessagesRequest:
