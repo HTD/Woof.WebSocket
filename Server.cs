@@ -57,7 +57,7 @@ namespace Woof.WebSocket {
             var prefix = RxWS.Replace(EndPointUri.ToString(), "http");
             Listener.Prefixes.Add(prefix);
             Listener.Start();
-            await AsyncLoop.FromIterationAsync(OnClientConnectedAsync, CTS.Token, OnConnectException);
+            await AsyncLoop.FromIterationAsync(OnClientConnectedAsync, OnConnectException, null, false, CTS.Token);
             State = ServiceState.Started;
             OnStateChanged(State);
         }
@@ -161,6 +161,8 @@ namespace Woof.WebSocket {
 
         #region Event handlers
 
+        
+
         /// <summary>
         /// Called when a client is connected.
         /// </summary>
@@ -175,10 +177,14 @@ namespace Woof.WebSocket {
                 if (context.IsOpen) {
                     SessionProvider.OpenSession(context);
                     Clients.Add(context);
-                    await StartReceiveAsync(context, CTS.Token, cleanUpAsync: OnClientDisconnectedAsync);
-                    _ = Task.Run(() => ClientConnected?.Invoke(this, new WebSocketEventArgs(context)));
+                    await StartReceiveAsync(context, cleanUpAsync: OnClientDisconnectedAsync, CTS.Token);
+                    _ = Task.Run(() => OnClientConnected(new WebSocketEventArgs(context)));
                 }
             }
+        }
+
+        protected virtual void OnClientConnected(WebSocketEventArgs e) {
+            ClientConnected?.Invoke(this, e);
         }
 
         /// <summary>
@@ -187,7 +193,8 @@ namespace Woof.WebSocket {
         /// <param name="context">WebSocket context.</param>
         /// <returns>Task completed when the socket is closed, disposed and removed.</returns>
         private async Task OnClientDisconnectedAsync(WebSocketContext context) {
-            ClientDisconnecting?.Invoke(this, new WebSocketEventArgs(context));
+            //ClientDisconnecting?.Invoke(this, new WebSocketEventArgs(context));
+            _ = Task.Run(() => OnClientDisconnecting(new WebSocketEventArgs(context)));
             SessionProvider.CloseSession(context);
             if (CTS != null) {
                 await context.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, null, CTS.Token);
@@ -197,13 +204,19 @@ namespace Woof.WebSocket {
             Clients.Remove(context);
         }
 
+        protected virtual void OnClientDisconnecting(WebSocketEventArgs e) {
+            ClientDisconnecting?.Invoke(this, e);
+        }
+
         /// <summary>
         /// Called when the exception occurs during connecting a client.
         /// </summary>
         /// <param name="exception"></param>
-        protected virtual void OnConnectException(Exception exception)
-            => ConnectException?.Invoke(this, new ExceptionEventArgs(exception));
-
+        protected virtual void OnConnectException(Exception exception) {
+            if (exception is HttpListenerException hlx && hlx.ErrorCode == 995)
+                return; // connection aborted - it's normal on server shutdown.
+            ConnectException?.Invoke(this, new ExceptionEventArgs(exception));
+        }
         #endregion
 
         #region Data fields
@@ -211,12 +224,12 @@ namespace Woof.WebSocket {
         /// <summary>
         /// Socket contexts of the clients currently connected to the server.
         /// </summary>
-        private readonly List<WebSocketContext> Clients = new List<WebSocketContext>();
+        private readonly List<WebSocketContext> Clients = new();
         
         /// <summary>
         /// A regular expression matching WebSocket protocol URI part.
         /// </summary>
-        private readonly Regex RxWS = new Regex(@"^ws", RegexOptions.Compiled);
+        private readonly Regex RxWS = new(@"^ws", RegexOptions.Compiled);
         
         /// <summary>
         /// A <see cref="HttpListener"/> used to listen for incomming connections.

@@ -47,6 +47,16 @@ namespace Woof.WebSocket {
         public IAuthenticationProvider? AuthenticationProvider { get; set; }
 
         /// <summary>
+        /// Gets the subprotocol codec.
+        /// </summary>
+        public TCodec Codec { get; }
+
+        /// <summary>
+        /// Gets the WebSocket end point URI.
+        /// </summary>
+        public Uri? EndPointUri { get; set; }
+
+        /// <summary>
         /// Gets the current client or server state.
         /// </summary>
         public ServiceState State { get; set; } = ServiceState.Stopped;
@@ -69,16 +79,6 @@ namespace Woof.WebSocket {
         /// Gets the cancellation token used for the client or server instance.
         /// </summary>
         protected CancellationToken CancellationToken => CTS?.Token ?? CancellationToken.None;
-
-        /// <summary>
-        /// Gets the subprotocol codec.
-        /// </summary>
-        protected TCodec Codec { get; }
-
-        /// <summary>
-        /// Gets the WebSocket end point URI.
-        /// </summary>
-        protected Uri? EndPointUri { get; set; }
 
         /// <summary>
         /// A collection of incomplete requests requiring the other party's response.
@@ -133,7 +133,7 @@ namespace Woof.WebSocket {
             }
             while (!CancellationToken.IsCancellationRequested && context.IsOpen) {
                 try {
-                    var decodeResult = await Codec.DecodeMessageAsync(context, CancellationToken, MaxReceiveMessageSize);
+                    var decodeResult = await Codec.DecodeMessageAsync(context, MaxReceiveMessageSize, CancellationToken);
                     if (decodeResult is null) continue; // we should ignore empty frames, shouldn't we?
                     if (!decodeResult.IsSuccess && decodeResult.Exception?.Message != null) throw decodeResult.Exception;
                     if (decodeResult.IsCloseFrame) break;
@@ -149,8 +149,10 @@ namespace Woof.WebSocket {
                     }
                 }
                 catch (Exception exception) {
-                    if (exception is TaskCanceledException) throw;
-                    if (exception is WebSocketException wsx && wsx.InnerException is TaskCanceledException) throw;
+                    var isCanceled =
+                        exception is TaskCanceledException ||
+                        (exception is WebSocketException wsx && wsx.InnerException is TaskCanceledException);
+                    if (isCanceled) break;
                     _ = Task.Run(() => OnReceiveException(exception));
                 }
             }
@@ -160,10 +162,10 @@ namespace Woof.WebSocket {
         /// Starts the receiving task for the specified context.
         /// </summary>
         /// <param name="context">WebSocket context.</param>
-        /// <param name="token">Cancellation token used to cancel the task created.</param>
         /// <param name="cleanUpAsync">Optional asynchronous clean up function executed after the receiving loop is ended.</param>
+        /// <param name="token">Cancellation token used to cancel the task created.</param>
         /// <returns>Created task.</returns>
-        protected async Task StartReceiveAsync(WebSocketContext context, CancellationToken token, Func<WebSocketContext, Task>? cleanUpAsync = null) {
+        protected async Task StartReceiveAsync(WebSocketContext context, Func<WebSocketContext, Task>? cleanUpAsync = null, CancellationToken token = default) {
             if (cleanUpAsync is null)
                 await Task.Factory.StartNew(
                     async() => await Receive(context),
@@ -188,7 +190,7 @@ namespace Woof.WebSocket {
         /// <param name="id">Optional message identifier, if not set - new unique identifier will be used.</param>
         /// <returns>Task completed when the sending is done.</returns>
         protected async Task SendMessageAsync(object message, Type? typeHint, WebSocketContext context, Guid id = default)
-            => await Codec.SendEncodedAsync(context, CancellationToken, message, typeHint, id);
+            => await Codec.SendEncodedAsync(context, message, typeHint, id, CancellationToken);
         
 
         /// <summary>
@@ -200,10 +202,7 @@ namespace Woof.WebSocket {
         /// <param name="id">Optional message identifier, if not set - new unique identifier will be used.</param>
         /// <returns>Task completed when the sending is done.</returns>
         protected async Task SendMessageAsync<TMessage>(TMessage message, WebSocketContext context, Guid id = default)
-            => await Codec.SendEncodedAsync(context, CancellationToken, message, id);
-
-        //protected async Task SendMessageAsync(ArraySegment<byte> rawMessage, MessageTypeContext typeContext, WebSocketContext context, Guid id = default)
-        //    => await Codec.SendEncodedAsync(context, CancellationToken, typeContext, rawMessage, id);
+            => await Codec.SendEncodedAsync(context, message, id, CancellationToken);
 
         /// <summary>
         /// Sends a message to the specified context and awaits until the response of the specified type is received.

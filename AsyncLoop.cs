@@ -13,17 +13,17 @@ namespace Woof.WebSocket {
         /// Creates a new task with an asynchronous loop using iteration asynchronous function.
         /// </summary>
         /// <param name="iteration">A function called on each loop iteration.</param>
-        /// <param name="token">Cancellation token used to end the loop.</param>
         /// <param name="exceptionHandler">Exception handler for the iteration.</param>
         /// <param name="condition">Optional condition that must evaluate true for the loop to continue or start.</param>
         /// <param name="breakOnException">If set true, exceptions in iteration should break the loop.</param>
+        /// <param name="token">Cancellation token used to end the loop.</param>
         /// <returns>The started <see cref="Task{TResult}"/>.</returns>
         public static async Task FromIterationAsync(
             Func<Task> iteration,
-            CancellationToken token,
             Action<Exception>? exceptionHandler = null,
             Func<bool>? condition = null,
-            bool breakOnException = false
+            bool breakOnException = false,
+            CancellationToken token = default
         ) => await Task.Factory.StartNew(async () => {
             try {
                 while (!token.IsCancellationRequested && (condition is null || condition())) {

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Threading;
@@ -60,32 +59,32 @@ namespace Woof.WebSocket {
         /// Reads and decodes a message from the WebSocket context.
         /// </summary>
         /// <param name="context">WebSocket context.</param>
-        /// <param name="token">Cancellation token.</param>
         /// <param name="limit">Optional message length limit, applied if positive value provided.</param>
+        /// <param name="token">Cancellation token.</param>
         /// <returns>Task returning decoded message with the identifier.</returns>
-        public abstract Task<DecodeResult?> DecodeMessageAsync(WebSocketContext context, CancellationToken token, int limit = -1);
+        public abstract Task<DecodeResult?> DecodeMessageAsync(WebSocketContext context, int limit = -1, CancellationToken token = default);
 
         /// <summary>
         /// Encodes the message and sends it to the WebSocket context.
         /// </summary>
         /// <param name="context">WebSocket context.</param>
-        /// <param name="token">Cancellation token.</param>
         /// <param name="message">Message to send.</param>
         /// <param name="typeHint">Type hint.</param>
         /// <param name="id">Optional message identifier, if not set - new unique identifier will be used.</param>
+        /// <param name="token">Cancellation token.</param>
         /// <returns>Task completed when the message is sent.</returns>
-        public abstract Task SendEncodedAsync(WebSocketContext context, CancellationToken token, object message, Type? typeHint = null, Guid id = default);
+        public abstract Task SendEncodedAsync(WebSocketContext context, object message, Type? typeHint = null, Guid id = default, CancellationToken token = default);
 
         /// <summary>
         /// Encodes the message and sends it to the WebSocket context.
         /// </summary>
         /// <typeparam name="TMessage">Message type.</typeparam>
         /// <param name="context">WebSocket context.</param>
-        /// <param name="token">Cancellation token.</param>
         /// <param name="message">Message to send.</param>
         /// <param name="id">Optional message identifier, if not set - new unique identifier will be used.</param>
+        /// <param name="token">Cancellation token.</param>
         /// <returns>Task completed when the message is sent.</returns>
-        public abstract Task SendEncodedAsync<TMessage>(WebSocketContext context, CancellationToken token, TMessage message, Guid id = default);
+        public abstract Task SendEncodedAsync<TMessage>(WebSocketContext context, TMessage message, Guid id = default, CancellationToken token = default);
 
         /// <summary>
         /// Signs a serialized message payload with a type of HMAC algorithm.

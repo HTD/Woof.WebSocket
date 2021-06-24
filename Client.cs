@@ -45,7 +45,7 @@ namespace Woof.WebSocket {
                 IsConnected = false;
                 await clientWebSocket.ConnectAsync(EndPointUri, linkedCTS.Token);
                 IsConnected = true;
-                await StartReceiveAsync(Context, linkedCTS.Token, OnCloseReceivedAsync);
+                await StartReceiveAsync(Context, OnCloseReceivedAsync, linkedCTS.Token);
             } catch {
                 await StopAsync();
                 if (timeoutCTS.IsCancellationRequested)
