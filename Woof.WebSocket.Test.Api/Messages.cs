@@ -170,5 +170,31 @@ namespace Woof.WebSocket.Test.Api {
 
     [Message(19), ProtoContract]
     public class RestartRequest { }
+
+
+    [ProtoContract]
+    public class SingleItem {
+
+        [ProtoMember(1)]
+        public Guid Id { get; set; }
+
+        [ProtoMember(2)]
+        public int Number { get; set; }
+
+        [ProtoMember(3)]
+        public string Text { get; set; }
+
+        [ProtoMember(4)]
+        public int[] Array { get; set; }
+
+    }
+
+    [Message(21), ProtoContract]
+    public class ComplexArray {
+
+        [ProtoMember(1)]
+        public SingleItem[] Items { get; set; }
+
+    }
     
 }
