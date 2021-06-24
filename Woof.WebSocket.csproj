@@ -9,7 +9,8 @@ WOOF subprotocol is based on Google Protocol Buffers to serialize data and fixed
     <Copyright>(c)2020 by CodeDog Ltd</Copyright>
     <PackageProjectUrl>https://github.com/HTD/Woof.WebSocket</PackageProjectUrl>
     <PackageTags>WebSocket</PackageTags>
-    <PackageReleaseNotes>Operations now time out properly, unknown messages don't break anything, but trigger the exception event.</PackageReleaseNotes>
+    <PackageReleaseNotes>FIX: Serious bug with long messages transmission.
+FIX: Changed method signatures for CancellationToken to be the last, default parameter.</PackageReleaseNotes>
     <Authors>Adam Łyskawa</Authors>
     <Company>CodeDog Ltd</Company>
     <PackageLicenseExpression></PackageLicenseExpression>
