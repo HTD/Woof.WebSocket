@@ -90,6 +90,9 @@ namespace Woof.WebSocket.Test.Server {
                     await StopAsync();
                     await StartAsync();
                     break;
+                case ComplexArray complexArray:
+                    await SendMessageAsync(new ComplexArray { Items = complexArray.Items }, context, decodeResult.MessageId);
+                    break;
             }
         
         }

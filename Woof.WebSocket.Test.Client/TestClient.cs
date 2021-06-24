@@ -98,6 +98,14 @@ namespace Woof.WebSocket.Test.Client {
         public async Task RestartServerAsync()
             => await SendMessageAsync(new RestartRequest());
 
+        public async Task<SingleItem[]> ComplexArrayAsync()
+            => (await SendAndReceiveAsync<ComplexArray, ComplexArray>(new ComplexArray {
+                Items = new [] {
+                    new SingleItem { Id = Guid.NewGuid(), Number = 1, Text = "A", Array = Array.Empty<int>() },
+                    new SingleItem { Id = Guid.NewGuid(), Number = 2, Text = "B", Array = Array.Empty<int>() },
+                }
+            })).Items;
+
     }
 
 }

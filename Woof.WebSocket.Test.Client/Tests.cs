@@ -46,6 +46,7 @@ namespace Woof.WebSocket.Test.Client {
         /// <returns>Task completed when matched tests completed.</returns>
         public async Task MatchTestsFromArguments(string[] args) {
             if (Client.State != ServiceState.Started) return;
+            if (IsArgMatched(args, "complex-array")) await ComplexArrayTestAsync();
             if (IsArgMatched(args, "auth")) await AuthorizationTestAsync();
             if (IsArgMatched(args, "ping")) await PingTestAsync();
             if (IsArgMatched(args, "ping-pong", out int iterations, 128)) await PingPongTestAsync(iterations);
@@ -66,7 +67,7 @@ namespace Woof.WebSocket.Test.Client {
         /// <param name="args">Command line arguments.</param>
         /// <param name="item">Item to match.</param>
         /// <returns>True if matched.</returns>
-        bool IsArgMatched(string[] args, string item)
+        static bool IsArgMatched(string[] args, string item)
             => args.Contains("all", StringComparer.OrdinalIgnoreCase) || args.Contains(item, StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
@@ -76,7 +77,7 @@ namespace Woof.WebSocket.Test.Client {
         /// <param name="item">Item to match.</param>
         /// <param name="parameter">Parameter string.</param>
         /// <returns>True if matched.</returns>
-        bool IsArgMatched(string[] args, string item, out string parameter) {
+        static bool IsArgMatched(string[] args, string item, out string parameter) {
             for (int i = 0, n = args.Length; i < n; i++)
                 if (args[i].Equals(item, StringComparison.OrdinalIgnoreCase)) {
                     parameter = i <= n - 2 ? args[i + 1] : null; return true;
@@ -94,7 +95,7 @@ namespace Woof.WebSocket.Test.Client {
         /// <param name="parameter">Parameter number.</param>
         /// <param name="fallback">Fallback value if different from default for the type.</param>
         /// <returns>True if matched.</returns>
-        bool IsArgMatched(string[] args, string item, out double parameter, double fallback = default) {
+        static bool IsArgMatched(string[] args, string item, out double parameter, double fallback = default) {
             parameter = fallback;
             if (!IsArgMatched(args, item, out string candidate)) return false;
             if (candidate is null || !Regex.IsMatch(candidate, @"^\d")) return true;
@@ -109,7 +110,7 @@ namespace Woof.WebSocket.Test.Client {
         /// <param name="parameter">Parameter number.</param>
         /// <param name="fallback">Fallback value if different from default for the type.</param>
         /// <returns>True if matched.</returns>
-        bool IsArgMatched(string[] args, string item, out int parameter, int fallback = default) {
+        static bool IsArgMatched(string[] args, string item, out int parameter, int fallback = default) {
             parameter = fallback;
             if (!IsArgMatched(args, item, out string candidate)) return false;
             if (candidate is null || !Regex.IsMatch(candidate, @"^\d")) return true;
@@ -291,6 +292,13 @@ namespace Woof.WebSocket.Test.Client {
             DescribeResult(timeOutCount == 1);
         }
 
+        public async Task ComplexArrayTestAsync() {
+            DescribeTest("Complex array");
+            var data = await Client.ComplexArrayAsync();
+            var isOK = data.Length == 2;
+            DescribeResult(isOK);
+        }
+
         #endregion
 
         #region Notifications tests
@@ -314,14 +322,14 @@ namespace Woof.WebSocket.Test.Client {
         /// Describes the test and leaves the carret in the same line.
         /// </summary>
         /// <param name="description">Test description.</param>
-        private void DescribeTest(string description) => Console.Write($"{description}...");
+        private static void DescribeTest(string description) => Console.Write($"{description}...");
 
         /// <summary>
         /// Describes the test result and ends the text line.
         /// </summary>
         /// <param name="result"><see cref="true"/>: success, <see cref="false"/>: fail.</param>
         /// <param name="remarks">Optional remarks.</param>
-        private void DescribeResult(bool result, string remarks = null) {
+        private static void DescribeResult(bool result, string remarks = null) {
             Console.Write(result ? "OK." : "FAIL!");
             if (remarks is null) Console.WriteLine();
             else Console.WriteLine($" ({remarks})");
