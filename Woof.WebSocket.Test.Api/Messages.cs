@@ -196,5 +196,16 @@ namespace Woof.WebSocket.Test.Api {
         public SingleItem[] Items { get; set; }
 
     }
+
+    [Message(100), ProtoContract]
+    public class GetUriRequest { }
+
+    [Message(101), ProtoContract]
+    public class GetUriResponse {
+
+        [ProtoMember(1)]
+        public string RequestUri { get; set; }
+
+    }
     
 }

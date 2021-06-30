@@ -26,7 +26,7 @@ namespace Tests {
             Count = Data.Length;
         }
 
-        private static readonly Random PRNG = new Random();
+        private static readonly Random PRNG = new();
         private int Offset;
         private int Count;
 

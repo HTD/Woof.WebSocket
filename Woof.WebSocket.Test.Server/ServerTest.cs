@@ -30,7 +30,7 @@ namespace Woof.WebSocket.Test.Server {
         /// <param name="sender">Server.</param>
         /// <param name="e">WebSocket context arguments.</param>
         private static void Server_ClientConnected(object sender, WebSocketEventArgs e)
-            => Console.WriteLine("CLIENT CONNECTED.");
+            => Console.WriteLine($"CLIENT CONNECTED FROM {e.Context.LocalEndPoint}.");
 
         /// <summary>
         /// Handles client disconnecting event.
@@ -54,7 +54,7 @@ namespace Woof.WebSocket.Test.Server {
         /// <param name="sender">Server.</param>
         /// <param name="e">Exception data.</param>
         static void Server_ConnectException(object sender, ExceptionEventArgs e)
-            => Console.WriteLine($"SERVER RECEIVE EXCEPTION: {e.Exception.Message}");
+            => Console.WriteLine($"SERVER CONNECT EXCEPTION: {e.Exception.Message}{Environment.NewLine}STACKTRACE:{Environment.NewLine}{e.Exception.StackTrace}");
 
         /// <summary>
         /// Handles server receive exceptions.
@@ -62,7 +62,7 @@ namespace Woof.WebSocket.Test.Server {
         /// <param name="sender">Server.</param>
         /// <param name="e">Exception data.</param>
         static void Server_ReceiveException(object sender, ExceptionEventArgs e)
-            => Console.WriteLine($"SERVER RECEIVE EXCEPTION: {e.Exception.Message}");
+            => Console.WriteLine($"SERVER RECEIVE EXCEPTION: {e.Exception.Message}{Environment.NewLine}STACKTRACE:{Environment.NewLine}{e.Exception.StackTrace}");
 
         /// <summary>
         /// Waits for Ctrl+C.
