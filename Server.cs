@@ -168,19 +168,22 @@ namespace Woof.WebSocket {
         /// </summary>
         /// <returns>Task completed when receiving loop is started.</returns>
         private async Task OnClientConnectedAsync() {
-            if (Listener is null || CTS is null) return;
-            var httpListenerContext = await Listener.GetContextAsync();
-            if (httpListenerContext.Request.IsWebSocketRequest) {
-                HttpListenerWebSocketContext httpListenerWebSocketContext;
-                httpListenerWebSocketContext = await httpListenerContext.AcceptWebSocketAsync(Codec.SubProtocol ?? String.Empty);
-                var context = new WebSocketContext(httpListenerWebSocketContext);
-                if (context.IsOpen) {
-                    SessionProvider.OpenSession(context);
-                    Clients.Add(context);
-                    await StartReceiveAsync(context, cleanUpAsync: OnClientDisconnectedAsync, CTS.Token);
-                    _ = Task.Run(() => OnClientConnected(new WebSocketEventArgs(context)));
+            if (Listener is null || CTS is null || State == ServiceState.Stopping) return;
+            try {
+                var httpListenerContext = await Listener.GetContextAsync();
+                if (httpListenerContext.Request.IsWebSocketRequest) {
+                    HttpListenerWebSocketContext httpListenerWebSocketContext;
+                    httpListenerWebSocketContext = await httpListenerContext.AcceptWebSocketAsync(Codec.SubProtocol ?? String.Empty);
+                    var context = new WebSocketContext(httpListenerWebSocketContext, httpListenerContext.Request);
+                    if (context.IsOpen) {
+                        SessionProvider.OpenSession(context);
+                        Clients.Add(context);
+                        await StartReceiveAsync(context, cleanUpAsync: OnClientDisconnectedAsync, CTS.Token);
+                        _ = Task.Run(() => OnClientConnected(new WebSocketEventArgs(context)));
+                    }
                 }
             }
+            catch (ObjectDisposedException) { }
         }
 
         protected virtual void OnClientConnected(WebSocketEventArgs e) {

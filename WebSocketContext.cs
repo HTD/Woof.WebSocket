@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,6 +21,16 @@ namespace Woof.WebSocket {
         /// Gets the <see cref="HttpListenerWebSocketContext"/> if the socket was obtained from <see cref="System.Net.HttpListener"/>.
         /// </summary>
         public HttpListenerWebSocketContext? HttpContext { get; }
+
+        /// <summary>
+        /// Gets the server IP address and port number to which the request is directed.
+        /// </summary>
+        public IPEndPoint? LocalEndPoint { get; }
+
+        /// <summary>
+        /// Gets the client IP address and port number from which the request originated.
+        /// </summary>
+        public IPEndPoint? RemoteEndPoint { get; }
 
         /// <summary>
         /// Allows the remote endpoint to describe the reason why the connection was closed.
@@ -54,7 +65,13 @@ namespace Woof.WebSocket {
         /// Creates the context from the <see cref="HttpListenerWebSocketContext"/>.
         /// </summary>
         /// <param name="httpContext">HTTP context.</param>
-        public WebSocketContext(HttpListenerWebSocketContext httpContext) {
+        public WebSocketContext(HttpListenerWebSocketContext httpContext, HttpListenerRequest request) {
+            LocalEndPoint = request.LocalEndPoint;
+            RemoteEndPoint = request.RemoteEndPoint;
+            var xForwardedForHeader = httpContext.Headers["X-Forwarded-For"];
+            if (xForwardedForHeader != null)
+                LocalEndPoint = IPEndPoint.Parse(xForwardedForHeader);
+            if (LocalEndPoint.Port < 1) LocalEndPoint.Port = 443;
             HttpContext = httpContext;
             Socket = HttpContext.WebSocket;
             Semaphore = new SemaphoreSlim(1, 1);
@@ -86,8 +103,8 @@ namespace Woof.WebSocket {
         public async Task CloseOutputAsync(WebSocketCloseStatus closeStatus, string? statusDescription, CancellationToken cancellationToken) {
             await Semaphore.WaitAsync(cancellationToken);
             try {
-                
-                await Socket.CloseOutputAsync(closeStatus, statusDescription, cancellationToken);
+                if (Socket.State == WebSocketState.Open || Socket.State == WebSocketState.CloseReceived)
+                    await Socket.CloseOutputAsync(closeStatus, statusDescription, cancellationToken);
             } finally {
                 Semaphore.Release();
             }
