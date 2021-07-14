@@ -9,8 +9,7 @@ WOOF subprotocol is based on Google Protocol Buffers to serialize data and fixed
     <Copyright>(c)2021 by CodeDog Ltd</Copyright>
     <PackageProjectUrl>https://github.com/HTD/Woof.WebSocket</PackageProjectUrl>
     <PackageTags>WebSocket</PackageTags>
-    <PackageReleaseNotes>ADD: LocalEndPoint, RemoteEndPoint properties in WebSocketContext.
-FIX: Errors on server disconnection while client is connected.</PackageReleaseNotes>
+    <PackageReleaseNotes>FIX: Now exceptions in IAuthentication provider are caught and passed in Exception property of DecodeResult. That allows them to be handled in OnMessageReceived handler.</PackageReleaseNotes>
     <Authors>Adam Łyskawa</Authors>
     <Company>CodeDog Ltd</Company>
     <PackageLicenseExpression></PackageLicenseExpression>
@@ -18,10 +17,12 @@ FIX: Errors on server disconnection while client is connected.</PackageReleaseNo
     <Product>Woof.WebSocket</Product>
     <PackageId>Woof.WebSocket</PackageId>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>5.1.0</Version>
+    <Version>5.2.0</Version>
     <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <AssemblyVersion>5.2.0.0</AssemblyVersion>
+    <FileVersion>5.2.0.0</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
