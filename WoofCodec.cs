@@ -117,17 +117,23 @@ namespace Woof.WebSocket {
             var message = Serializer.Deserialize(MessageTypes[metaData.TypeId].MessageType, messageSegment);
             var isSignatureValid = false;
             var isSignInRequest = typeContext.IsSignInRequest || message is ISignInRequest;
+            
             if (typeContext.IsSigned && metaData.Signature != null) {
-                var key =
-                    isSignInRequest
-                    ? (message is ISignInRequest signInRequest && State.AuthenticationProvider != null 
-                        ? await State.AuthenticationProvider.GetKeyAsync(signInRequest.ApiKey) 
-                        : null
-                    )
-                    : State.SessionProvider.GetKey(context);
-                if (key != null) {
-                    byte[] expected = Sign(messageSegment, key);
-                    isSignatureValid = metaData.Signature.SequenceEqual(expected);
+                try {
+                    var key =
+                        isSignInRequest
+                        ? (message is ISignInRequest signInRequest && State.AuthenticationProvider != null
+                            ? await State.AuthenticationProvider.GetKeyAsync(signInRequest.ApiKey)
+                            : null
+                        )
+                        : State.SessionProvider.GetKey(context);
+                    if (key != null) {
+                        byte[] expected = Sign(messageSegment, key);
+                        isSignatureValid = metaData.Signature.SequenceEqual(expected);
+                    }
+                } catch (Exception exception) {
+                    // A result must be returned when IAuthenticationProvider throws to allow proper handling in implementing code:
+                    return new DecodeResult(typeContext, message, metaData.Id, !isSignInRequest && typeContext.IsSigned, isSignatureValid: false, exception);
                 }
             }
             return new DecodeResult(typeContext, message, metaData.Id, !isSignInRequest && typeContext.IsSigned, isSignatureValid);

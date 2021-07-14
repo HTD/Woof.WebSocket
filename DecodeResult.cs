@@ -67,13 +67,15 @@ namespace Woof.WebSocket {
         /// <param name="id">Message identifier.</param>
         /// <param name="isValidSignatureRequired">True, if a valid signature of the message is required.</param>
         /// <param name="isSignatureValid">True, if the message signature is verified.</param>
-        public DecodeResult(MessageTypeContext? typeContext, object? message, Guid id, bool isValidSignatureRequired = false, bool isSignatureValid = false) {
+        /// <param name="exception">Optional exception, if <see cref="IAuthenticationProvider"/> thrown it while decoding.</param>
+        public DecodeResult(MessageTypeContext? typeContext, object? message, Guid id, bool isValidSignatureRequired = false, bool isSignatureValid = false, Exception? exception = null) {
             TypeContext = typeContext;
             MessageId = id;
             Message = message;
             IsSignatureValid = isSignatureValid;
             IsUnauthorized = isValidSignatureRequired && !isSignatureValid;
             IsSuccess = true;
+            Exception = exception;
         }
 
         /// <summary>
